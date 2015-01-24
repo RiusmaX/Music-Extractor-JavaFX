@@ -8,6 +8,9 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.stage.DirectoryChooser;
+
+import java.io.File;
 
 
 /**
@@ -35,6 +38,13 @@ public class VideoOverviewController {
     private Button validate;
     @FXML
     private Button download;
+    @FXML
+    private TextField downloadPath;
+    @FXML
+    private Button changeDirectory;
+    @FXML
+    private ProgressBar progress;
+
 
     private MainApp mainApp;
 
@@ -79,6 +89,10 @@ public class VideoOverviewController {
         // Initialize the person table with the two columns.
         titleColumn.setCellValueFactory(cellData -> cellData.getValue().videoTitleProperty());
 
+        url.setText("https://www.youtube.com/watch?v=S2bjqrRbNW4&list=RDS2bjqrRbNW4#t=0");
+        downloadPath.setText(System.getProperty("user.home"));
+        downloadPath.setDisable(true);
+
         // Clear video details
         setVideoDetails(null);
 
@@ -97,16 +111,30 @@ public class VideoOverviewController {
         download.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                mainApp.download(url.getText());
+                //TODO : Envoyer la liste de vidéos au lieu d'envoyer l'url qui pourrait être effacée !
+                mainApp.download();
             }
         });
 
+        changeDirectory.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                DirectoryChooser directoryChooser = new DirectoryChooser();
+                File selectedDirectory = directoryChooser.showDialog(mainApp.getPrimaryStage());
 
+                downloadPath.setText(selectedDirectory.getAbsolutePath());
+
+            }
+        });
     }
 
     public void setMainApp(MainApp mainApp){
         this.mainApp = mainApp;
 
         videoTable.setItems(mainApp.getVideoData());
+    }
+
+    public String getDownloadPath(){
+        return downloadPath.getText();
     }
 }

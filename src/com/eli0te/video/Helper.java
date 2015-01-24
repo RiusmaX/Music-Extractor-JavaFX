@@ -1,6 +1,7 @@
 package com.eli0te.video;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,7 +34,13 @@ public class Helper {
 
         Process[] p = new Process[1];
 
-        p[0] = new ProcessBuilder(cmd, "-j", url).start();
+        try {
+            p[0] = new ProcessBuilder(cmd, "-j", url).start();
+        } catch (IOException e){
+            p[0] = new ProcessBuilder("chmod", "a+x",cmd).start();
+            p[0] = new ProcessBuilder(cmd, "-j", url).start();
+        }
+
 
         InputStreamReader is = new InputStreamReader(p[0].getInputStream());
 
@@ -45,6 +52,7 @@ public class Helper {
 
         int i = 0;
         HashMap<String, String> infoMap;
+        String duration;
 
         //Chaque ligne retourné est égale aux infos d'une vidéos (si playlist, plusieurs lignes)
         while ( (cmdOutput = in.readLine() ) != null ) {
@@ -57,7 +65,11 @@ public class Helper {
             infoMap.put("title", line.getString("title"));
             infoMap.put("description", line.getString("description"));
             infoMap.put("thumbnail", line.getString("thumbnail"));
-            infoMap.put("duration", String.valueOf(line.getInt("duration")));
+            infoMap.put("duration", getFormatDuration(line.getInt("duration")));
+            infoMap.put("uploader", line.getString("uploader"));
+            infoMap.put("videoUrl", line.getString("webpage_url"));
+            infoMap.put("playlistTitle", line.getString("playlist_title"));
+
 
             infoMapList.add(i, infoMap);
             i++;
@@ -137,6 +149,20 @@ public class Helper {
         return path.replaceAll("[^a-zA-Z0-9.-]", " "); // Comprends pas c'est la même qu'au dessus j'avais fais celle la
         //pour le renomage de fichier // tu preans une classends le fichier à la fain et tu le rename ? Car c'est youtube=dl qui nome lesfichiers
         // bah ouais c'est dégeulasse sinon attebdje vais rajouter des trucs d
+    }
+
+    private String getFormatDuration(int seconds){
+        String formatedDuration = "";
+        int hours = seconds / 3600;
+        int minutes = (seconds % 3600) / 60;
+        seconds = seconds % 60;
+
+        if (hours > 0) {
+            formatedDuration += String.valueOf(hours) + ":";
+        }
+
+        return formatedDuration += minutes + ":" + seconds;
+
     }
 
     private static boolean isWindowsOS(){

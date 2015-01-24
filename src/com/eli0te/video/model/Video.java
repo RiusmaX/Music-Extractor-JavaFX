@@ -2,8 +2,6 @@ package com.eli0te.video.model;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.beans.value.ObservableValue;
-
 import java.util.HashMap;
 
 /**
@@ -16,6 +14,9 @@ public class Video {
     private final StringProperty videoDuration;
     private final StringProperty videoUploader;
     private final StringProperty videoThumbnail;
+    private final String videoUrl;
+    private final String playlistTitle;
+
 
     public Video(HashMap<String, String> videoInfo){
         this.videoTitle = new SimpleStringProperty(videoInfo.get("title"));
@@ -23,6 +24,8 @@ public class Video {
         this.videoDuration = new SimpleStringProperty(videoInfo.get("duration"));
         this.videoUploader = new SimpleStringProperty(videoInfo.get("uploader"));
         this.videoThumbnail = new SimpleStringProperty(videoInfo.get("thumbnail"));
+        this.videoUrl = videoInfo.get("videoUrl");
+        this.playlistTitle = videoInfo.get("playlistTitle");
     }
 
     public String getVideoDuration() {
@@ -63,5 +66,9 @@ public class Video {
 
     public StringProperty videoThumbnailProperty() {
         return videoThumbnail;
+    }
+
+    public String getVideoUrl() {
+        return videoUrl;
     }
 }

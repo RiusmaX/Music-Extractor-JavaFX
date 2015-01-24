@@ -45,12 +45,15 @@ public class MainApp extends Application {
             e.printStackTrace();
         }
 
-        videoData.addAll(videoList.stream().map(Video::new).collect(Collectors.toList()));
+        videoData.setAll(videoList.stream().map(Video::new).collect(Collectors.toList()));
+
     }
 
-    public void download(String url){
+    public void download(){
         try {
-            helper.getAudio(url,"C:\\Users\\Marius\\Desktop\\test");
+            for (int i = 0; i < videoData.size(); i++){
+                helper.getAudio(videoData.get(i).getVideoUrl(), controller.getDownloadPath());
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
