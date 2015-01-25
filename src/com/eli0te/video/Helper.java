@@ -1,12 +1,12 @@
 package com.eli0te.video;
 
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
-
-import org.json.JSONObject;
 
 /**
  * Created by eLi0tE on 16/01/15.
@@ -104,7 +104,7 @@ public class Helper {
         } else {
             cmd2 += "/";
         }
-        cmd2 += "%(title)s.mp3";
+        cmd2 += "%(title)s.%(ext)s";
 
         p[1] = new ProcessBuilder(cmd,
                 videoURL,
