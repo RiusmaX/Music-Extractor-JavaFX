@@ -1,5 +1,6 @@
 package com.eli0te.video;
 
+import com.eli0te.video.view.VideoOverviewController;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -35,10 +36,10 @@ public class Helper {
         Process[] p = new Process[1];
 
         try {
-            p[0] = new ProcessBuilder(cmd, "-j", url).start();
+            p[0] = new ProcessBuilder(cmd, "-i", "-j", url).start();
         } catch (IOException e){
             p[0] = new ProcessBuilder("chmod", "a+x",cmd).start();
-            p[0] = new ProcessBuilder(cmd, "-j", url).start();
+            p[0] = new ProcessBuilder(cmd,"-i", "-j", url).start();
         }
 
 
@@ -107,6 +108,7 @@ public class Helper {
         cmd2 += "%(title)s.%(ext)s";
 
         p[1] = new ProcessBuilder(cmd,
+                "-i",
                 videoURL,
                 "-x",
                 "--audio-format",
@@ -133,6 +135,7 @@ public class Helper {
                 s = cmdOutput.substring("[download] ".length(), cmdOutput.indexOf('%'));
                 if ( s.contains(".") ) // Exclusion du dernier 100% déjà en double
                     System.out.println(Float.parseFloat(s));
+                    //VideoOverviewController.updateProgress(Double.parseDouble(s));
                     //TODO : Update progressbar
             }
         }

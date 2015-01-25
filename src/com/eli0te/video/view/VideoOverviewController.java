@@ -48,7 +48,7 @@ public class VideoOverviewController {
     @FXML
     private Button changeDirectory;
     @FXML
-    private ProgressBar progress;
+    private static ProgressBar progress;
     @FXML
     private CheckBox selectAll;
 
@@ -144,6 +144,10 @@ public class VideoOverviewController {
             }
         });
     }
+
+    /*public static void updateProgress(double progressPercentage){
+        progress.setProgress(progressPercentage);
+    }*/
 
     public void setMainApp(MainApp mainApp){
         this.mainApp = mainApp;

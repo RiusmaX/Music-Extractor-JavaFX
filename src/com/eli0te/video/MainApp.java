@@ -55,7 +55,6 @@ public class MainApp extends Application {
                 if ( videoData.get(i).getToDownload() ) {
                     helper.getAudio(videoData.get(i).getVideoUrl(), controller.getDownloadPath());
                 }
-
             }
         } catch (Exception e) {
             e.printStackTrace();
