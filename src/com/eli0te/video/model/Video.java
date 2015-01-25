@@ -1,5 +1,7 @@
 package com.eli0te.video.model;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import java.util.HashMap;
@@ -17,6 +19,8 @@ public class Video {
     private final String videoUrl;
     private final String playlistTitle;
 
+    private final BooleanProperty toDownload;
+
 
     public Video(HashMap<String, String> videoInfo){
         this.videoTitle = new SimpleStringProperty(videoInfo.get("title"));
@@ -24,6 +28,7 @@ public class Video {
         this.videoDuration = new SimpleStringProperty(videoInfo.get("duration"));
         this.videoUploader = new SimpleStringProperty(videoInfo.get("uploader"));
         this.videoThumbnail = new SimpleStringProperty(videoInfo.get("thumbnail"));
+        this.toDownload = new SimpleBooleanProperty(true);
         this.videoUrl = videoInfo.get("videoUrl");
         this.playlistTitle = videoInfo.get("playlistTitle");
     }
@@ -70,5 +75,17 @@ public class Video {
 
     public String getVideoUrl() {
         return videoUrl;
+    }
+
+    public boolean getToDownload() {
+        return toDownload.get();
+    }
+
+    public BooleanProperty toDownloadProperty() {
+        return toDownload;
+    }
+
+    public void setToDownload(boolean toDownload) {
+        this.toDownload.set(toDownload);
     }
 }

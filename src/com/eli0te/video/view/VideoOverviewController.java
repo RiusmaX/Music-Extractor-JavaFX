@@ -2,10 +2,13 @@ package com.eli0te.video.view;
 
 import com.eli0te.video.MainApp;
 import com.eli0te.video.model.Video;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.CheckBoxTableCell;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.DirectoryChooser;
@@ -21,6 +24,8 @@ public class VideoOverviewController {
     private TableView<Video> videoTable;
     @FXML
     private TableColumn<Video, String> titleColumn;
+    @FXML
+    private TableColumn<Video, Boolean> checkboxColumn;
 
     @FXML
     private Label videoTitle;
@@ -44,6 +49,8 @@ public class VideoOverviewController {
     private Button changeDirectory;
     @FXML
     private ProgressBar progress;
+    @FXML
+    private CheckBox selectAll;
 
 
     private MainApp mainApp;
@@ -88,6 +95,9 @@ public class VideoOverviewController {
     private void initialize() {
         // Initialize the person table with the two columns.
         titleColumn.setCellValueFactory(cellData -> cellData.getValue().videoTitleProperty());
+        checkboxColumn.setCellValueFactory(cellData -> cellData.getValue().toDownloadProperty());
+        checkboxColumn.setCellFactory(CheckBoxTableCell.forTableColumn(checkboxColumn));
+        checkboxColumn.setEditable(true);
 
         url.setText("https://www.youtube.com/watch?v=S2bjqrRbNW4&list=RDS2bjqrRbNW4#t=0");
         downloadPath.setText(System.getProperty("user.home"));
@@ -100,6 +110,14 @@ public class VideoOverviewController {
         videoTable.getSelectionModel().selectedItemProperty().addListener(
                 (observable, oldValue, newValue) -> setVideoDetails(newValue)
         );
+        videoTable.setEditable(true);
+
+        selectAll.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                mainApp.toogleAll();
+            }
+        });
 
         validate.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -121,7 +139,6 @@ public class VideoOverviewController {
             public void handle(ActionEvent actionEvent) {
                 DirectoryChooser directoryChooser = new DirectoryChooser();
                 File selectedDirectory = directoryChooser.showDialog(mainApp.getPrimaryStage());
-
                 downloadPath.setText(selectedDirectory.getAbsolutePath());
 
             }

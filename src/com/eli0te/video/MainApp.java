@@ -52,7 +52,10 @@ public class MainApp extends Application {
     public void download(){
         try {
             for (int i = 0; i < videoData.size(); i++){
-                helper.getAudio(videoData.get(i).getVideoUrl(), controller.getDownloadPath());
+                if ( videoData.get(i).getToDownload() ) {
+                    helper.getAudio(videoData.get(i).getVideoUrl(), controller.getDownloadPath());
+                }
+
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -127,5 +130,12 @@ public class MainApp extends Application {
 
     public ObservableList<Video> getVideoData(){
         return videoData;
+    }
+
+    public void toogleAll() {
+        for (int i = 0; i < videoData.size(); i++){
+            videoData.get(i).setToDownload(!videoData.get(i).getToDownload());
+        }
+
     }
 }

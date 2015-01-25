@@ -40,7 +40,7 @@
                                        <children>
                                           <TableView fx:id="videoTable" layoutX="-13.0" layoutY="14.0" prefHeight="546.0" prefWidth="315.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                             <columns>
-                                              <TableColumn prefWidth="93.0" text="Télécharger ?" />
+                                              <TableColumn fx:id="checkboxColumn" prefWidth="93.0" text="Télécharger ?" />
                                               <TableColumn id="titleColumn" fx:id="titleColumn" prefWidth="222.0" text="Nom de la vidéo" />
                                             </columns>
                                           </TableView>
@@ -120,7 +120,7 @@
                                   <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                 </rowConstraints>
                                  <children>
-                                    <CheckBox mnemonicParsing="false" text="Tout sélectionner / Désélectionner" />
+                                    <CheckBox fx:id="selectAll" mnemonicParsing="false" selected="true" text="Inverser sélection" />
                                     <Button id="downloadButton" fx:id="download" mnemonicParsing="false" text="Télécharger" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
                                     <ProgressBar fx:id="progress" prefWidth="2000.0" progress="0.0" GridPane.columnSpan="2" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" />
                                     <TextField fx:id="downloadPath" GridPane.halignment="LEFT" GridPane.rowIndex="2" />
