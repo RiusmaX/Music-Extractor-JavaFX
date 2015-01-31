@@ -3,7 +3,10 @@ package com.eli0te.video;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import com.eli0te.video.model.Video;
@@ -50,15 +53,21 @@ public class MainApp extends Application {
     }
 
     public void download(){
-        try {
-            for (int i = 0; i < videoData.size(); i++){
-                if ( videoData.get(i).getToDownload() ) {
-                    helper.getAudio(videoData.get(i).getVideoUrl(), controller.getDownloadPath());
-                }
+
+        ExecutorService pool = Executors.newFixedThreadPool(videoData.size());
+        for (int i = 0; i < videoData.size(); i++) {
+            System.out.println("Ajout du thread " +String.valueOf(i) +" au pool");
+            if ( videoData.get(i).getToDownload() ) {
+                pool.submit(new ThreadDownloadHelper(videoData.get(i).getVideoUrl(),controller.getDownloadPath(),i,true));
             }
-        } catch (Exception e) {
+        }
+        pool.shutdown();
+        try {
+            pool.awaitTermination(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
     }
 
     @Override
@@ -100,7 +109,7 @@ public class MainApp extends Application {
             // Load person overview.
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(MainApp.class.getResource("view/VideoOverview.fxml"));
-            AnchorPane videoOverview = (AnchorPane) loader.load();
+            AnchorPane videoOverview = loader.load();
 
 
             // Set person overview into the center of root layout.
