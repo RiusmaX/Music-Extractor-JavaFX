@@ -1,14 +1,5 @@
 package com.eli0te.video;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
 import com.eli0te.video.model.Video;
 import com.eli0te.video.view.VideoOverviewController;
 import javafx.application.Application;
@@ -19,6 +10,14 @@ import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * Réalisation du tutoriel [http://code.makery.ch/java/javafx-8-tutorial-part1/] appliqué à la gestion des playlist
@@ -54,14 +53,24 @@ public class MainApp extends Application {
 
     public void download(){
 
-        ExecutorService pool = Executors.newFixedThreadPool(videoData.size());
+        int nbToDownload = 0;
+
         for (int i = 0; i < videoData.size(); i++) {
-            System.out.println("Ajout du thread " +String.valueOf(i) +" au pool");
+            if (videoData.get(i).getToDownload()) {
+                nbToDownload++;
+            }
+        }
+
+        ExecutorService pool = Executors.newFixedThreadPool(nbToDownload);
+
+        for (int i = 0; i < videoData.size(); i++) {
             if ( videoData.get(i).getToDownload() ) {
+                System.out.println("Téléchargement de la vidéo : " + videoData.get(i).getVideoTitle());
                 pool.submit(new ThreadDownloadHelper(videoData.get(i).getVideoUrl(),controller.getDownloadPath(),i,true));
             }
         }
         pool.shutdown();
+
         try {
             pool.awaitTermination(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {

@@ -2,13 +2,9 @@ package com.eli0te.video.view;
 
 import com.eli0te.video.MainApp;
 import com.eli0te.video.model.Video;
-import com.sun.org.apache.xpath.internal.operations.Bool;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.DirectoryChooser;
@@ -112,35 +108,22 @@ public class VideoOverviewController {
         );
         videoTable.setEditable(true);
 
-        selectAll.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                mainApp.toogleAll();
-            }
-        });
+        // SelectAll checkbox handler
+        selectAll.setOnAction(event -> mainApp.toogleAll());
 
-        validate.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                mainApp.setVideoList(url.getText());
-            }
-        });
+        // Validate button handler
+        validate.setOnAction(event -> mainApp.setVideoList(url.getText()));
 
-        download.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                //TODO : Envoyer la liste de vidéos au lieu d'envoyer l'url qui pourrait être effacée !
-                mainApp.download();
-            }
-        });
+        // Download button handler
+        download.setOnAction(event -> mainApp.download());
 
-        changeDirectory.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent actionEvent) {
+        // ChangeDirectory button handler
+        changeDirectory.setOnAction(actionEvent -> {
+            try {
                 DirectoryChooser directoryChooser = new DirectoryChooser();
                 File selectedDirectory = directoryChooser.showDialog(mainApp.getPrimaryStage());
                 downloadPath.setText(selectedDirectory.getAbsolutePath());
-
+            } catch (NullPointerException e) {
             }
         });
     }
