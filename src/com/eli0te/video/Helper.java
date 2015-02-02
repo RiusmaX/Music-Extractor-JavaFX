@@ -1,6 +1,5 @@
 package com.eli0te.video;
 
-import com.eli0te.video.view.VideoOverviewController;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -8,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Created by eLi0tE on 16/01/15.
@@ -29,7 +29,24 @@ public class Helper {
         }
     }
 
-    public void getVideo(String videoURL, String outputPath) throws Exception { }
+    public List<String> getVideosUrls(String playlistURL){
+        List<String> listeUrls = new ArrayList<>();
+        try{
+            Process p = new ProcessBuilder(cmd,"-i","--get-id",playlistURL).start();
+            InputStreamReader isr = new InputStreamReader(p.getInputStream());
+            BufferedReader in = new BufferedReader(isr);
+            String cmdOutput;
+            while ( (cmdOutput = in.readLine() ) != null ) {
+                System.out.println(cmdOutput);
+                String videoURL = "https://www.youtube.com/watch?v="+cmdOutput;
+                listeUrls.add(videoURL);
+            }
+
+        }catch (IOException ioe){
+            ioe.printStackTrace();
+        }
+        return listeUrls;
+    }
 
     public ArrayList<HashMap<String, String>> getInformation(String url) throws Exception{
 

@@ -1,14 +1,5 @@
 package com.eli0te.video;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
 import com.eli0te.video.model.Video;
 import com.eli0te.video.view.VideoOverviewController;
 import javafx.application.Application;
@@ -19,6 +10,14 @@ import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * Réalisation du tutoriel [http://code.makery.ch/java/javafx-8-tutorial-part1/] appliqué à la gestion des playlist
@@ -43,12 +42,13 @@ public class MainApp extends Application {
 
     public void setVideoList(String url){
         try {
-            videoList =  helper.getInformation(url);
+            //videoList =  helper.getInformation(url);
+            helper.getVideosUrls(url);
         } catch (Exception e){
             e.printStackTrace();
         }
 
-        videoData.setAll(videoList.stream().map(Video::new).collect(Collectors.toList()));
+        //videoData.setAll(videoList.stream().map(Video::new).collect(Collectors.toList()));
 
     }
 

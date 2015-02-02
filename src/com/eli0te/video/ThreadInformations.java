@@ -1,6 +1,5 @@
 package com.eli0te.video;
 
-import com.eli0te.video.view.VideoOverviewController;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -10,6 +9,7 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Created by eLi0tE on 16/01/15.
@@ -22,14 +22,14 @@ public class ThreadInformations implements Runnable {
     public static String TEMP_FOLDER = "";
 
 
-    ArrayList<HashMap<String, String>> infoMapList = new ArrayList<>();
+    HashMap<String, String> infoMap = new HashMap<>();
 
-    public ArrayList<HashMap<String, String>> getInfoMapList() {
-        return infoMapList;
+    public HashMap<String, String> getInfoMap() {
+        return infoMap;
     }
 
-    public void setInfoMapList(ArrayList<HashMap<String, String>> infoMapList) {
-        this.infoMapList = infoMapList;
+    public void setInfoMap(HashMap<String, String> infoMapList) {
+        this.infoMap = infoMapList;
     }
 
 
@@ -52,13 +52,15 @@ public class ThreadInformations implements Runnable {
     }
 
 
-    public ThreadInformations(String url, int threadNumber, ArrayList<HashMap<String, String>> infoMapList ) {
+    public ThreadInformations(String url, int threadNumber, HashMap<String, String> infoMap ) {
         setThreadNumber(threadNumber);
         setUrl(url);
-        setInfoMapList(infoMapList);
+        setInfoMap(infoMap);
     }
 
-    public ArrayList<HashMap<String, String>> getInformation(String url) throws Exception{
+
+
+    public HashMap<String, String> getInformation(String url) throws Exception{
 
         String cmd = "";
 
@@ -86,7 +88,7 @@ public class ThreadInformations implements Runnable {
         String cmdOutput;
 
         int i = 0;
-        HashMap<String, String> infoMap;
+        HashMap<String, String> infoMap = new HashMap<>();
         String duration;
 
         //Chaque ligne retourné est égale aux infos d'une vidéos (si playlist, plusieurs lignes)
@@ -105,12 +107,10 @@ public class ThreadInformations implements Runnable {
             infoMap.put("videoUrl", line.getString("webpage_url"));
             infoMap.put("playlistTitle", line.getString("playlist_title"));
 
-
-            infoMapList.add(i, infoMap);
             i++;
         }
         System.out.println(i);
-        return infoMapList;
+        return infoMap;
     }
 
 
@@ -127,7 +127,6 @@ public class ThreadInformations implements Runnable {
         }
 
         return formatedDuration += minutes + ":" + seconds;
-
     }
 
 
@@ -157,23 +156,33 @@ public class ThreadInformations implements Runnable {
     @Override
     public void run() {
 
+        // Uses of the right library depending on OS
+        if ( isWindowsOS() ) {
+            TEMP_FOLDER = System.getProperty("java.io.tmpdir")+"musicExtractorTemp\\";
+        } else {
+            TEMP_FOLDER = System.getProperty("java.io.tmpdir")+"musicExtractorTemp/";
+        }
+
         File youtubeDl = new File("lib\\youtube-dl.exe");
         File tempFolder = new File(TEMP_FOLDER);
         tempFolder.mkdirs();
         File destYoutubeDl = new File(TEMP_FOLDER+"youtube-dl("+String.valueOf(getThreadNumber())+").exe");
         try {
-            System.out.println("copie de youtubeDl ("+getThreadNumber()+")");
+            System.out.println("copie de youtubeDl (" + getThreadNumber() + ")");
             Files.copy(youtubeDl.toPath(), destYoutubeDl.toPath());
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        //TODO Appeller getInformations
+        try {
+            getInformation(getUrl());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-        
-        System.out.println("Suppression des fichiers (" + getThreadNumber() + ")");
         destYoutubeDl.delete();
         tempFolder.delete();
+
 
     }
 }
