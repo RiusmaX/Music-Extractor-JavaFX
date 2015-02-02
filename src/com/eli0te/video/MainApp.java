@@ -21,6 +21,8 @@ import java.util.stream.Collectors;
 
 /**
  * Réalisation du tutoriel [http://code.makery.ch/java/javafx-8-tutorial-part1/] appliqué à la gestion des playlist
+ *
+ * Nous ne sommes pas responsable de l'utilisation du produit faite par l'utilisateur !!!
  */
 public class MainApp extends Application {
 
@@ -30,6 +32,7 @@ public class MainApp extends Application {
     private VideoOverviewController controller;
     private ArrayList<HashMap<String, String>> videoList;
     private Helper helper;
+    private int nbToDownload;
 
     public MainApp(){
 
@@ -53,7 +56,7 @@ public class MainApp extends Application {
 
     public void download(){
 
-        int nbToDownload = 0;
+        nbToDownload = 0;
 
         for (int i = 0; i < videoData.size(); i++) {
             if (videoData.get(i).getToDownload()) {
@@ -66,7 +69,7 @@ public class MainApp extends Application {
         for (int i = 0; i < videoData.size(); i++) {
             if ( videoData.get(i).getToDownload() ) {
                 System.out.println("Téléchargement de la vidéo : " + videoData.get(i).getVideoTitle());
-                pool.submit(new ThreadDownloadHelper(videoData.get(i).getVideoUrl(),controller.getDownloadPath(),i,true));
+                pool.submit(new ThreadDownloadHelper(videoData.get(i).getVideoUrl(), i, true, controller));
             }
         }
         pool.shutdown();
@@ -149,10 +152,16 @@ public class MainApp extends Application {
         return videoData;
     }
 
+    public int getNbToDownload() {
+        return nbToDownload;
+    }
+
     public void toogleAll() {
         for (int i = 0; i < videoData.size(); i++){
-            videoData.get(i).setToDownload(!videoData.get(i).getToDownload());
+            if (controller.selectAllChecked())
+                videoData.get(i).setToDownload(true);
+            else
+                videoData.get(i).setToDownload(false);
         }
-
     }
 }

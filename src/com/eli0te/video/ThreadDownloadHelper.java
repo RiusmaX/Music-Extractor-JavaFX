@@ -1,15 +1,13 @@
 package com.eli0te.video;
 
+
 import com.eli0te.video.view.VideoOverviewController;
-import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * Created by eLi0tE on 16/01/15.
@@ -53,24 +51,41 @@ public class ThreadDownloadHelper implements Runnable {
     public boolean isAudioOnly() { return audioOnly; }
     public void setAudioOnly(boolean audioOnly) { this.audioOnly = audioOnly; }
 
+    //videoController
+    private VideoOverviewController controller;
+
+
     String cmd, cmd2;
 
-    public ThreadDownloadHelper(String url, String outputPath, int threadNumber, boolean audioOnly) {
+    public ThreadDownloadHelper(String url, int threadNumber, boolean audioOnly, VideoOverviewController controller) {
         setThreadNumber(threadNumber);
-        setOutputPath(outputPath);
+        setOutputPath(controller.getDownloadPath());
         setUrl(url);
         setAudioOnly(audioOnly);
+        this.controller = controller;
     }
 
-    public void getAudio(String videoURL, String outputPath) throws Exception {
+    public void getAudio(String videoURL) throws Exception {
 
-        String cmdYoutubeDl = TEMP_FOLDER+"youtube-dl("+String.valueOf(getThreadNumber())+").exe";
-        String cmdFfmpeg = TEMP_FOLDER+"ffmpeg("+String.valueOf(getThreadNumber())+").exe";
+        String cmdYoutubeDl = "";
+        String cmdFfmpeg = "";
 
-        Process[] p = new Process[3];
+        if (isWindowsOS()) {
+            TEMP_FOLDER = System.getProperty("java.io.tmpdir") + "musicExtractorTemp\\";
+            cmd += TEMP_FOLDER + "youtube-dl.exe";
+            cmdYoutubeDl = TEMP_FOLDER + "youtube-dl" + String.valueOf(getThreadNumber()) + ".exe";
+            cmdFfmpeg = TEMP_FOLDER + "ffmpeg" + String.valueOf(getThreadNumber()) + ".exe";
+        } else {
+            TEMP_FOLDER = System.getProperty("java.io.tmpdir") + "musicExtractorTemp/";
+            cmd += TEMP_FOLDER + "youtube-dl";
+            cmdYoutubeDl = TEMP_FOLDER + "youtube-dl" + String.valueOf(getThreadNumber());
+            cmdFfmpeg = TEMP_FOLDER + "ffmpeg" + String.valueOf(getThreadNumber());
+        }
 
-        p[0] = new ProcessBuilder(cmdYoutubeDl,"--get-filename", videoURL).start();
-        BufferedReader in = new BufferedReader( new InputStreamReader(p[0].getInputStream()) );
+        Process p;
+
+        p = new ProcessBuilder(cmdYoutubeDl, "--get-filename", videoURL).start();
+        BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
 
         String finalFileDir = outputPath + in.readLine().replace(".mp4",".mp3");
 
@@ -78,24 +93,24 @@ public class ThreadDownloadHelper implements Runnable {
         String audioFileDirTemp = TEMP_FOLDER+"audio_temp"+String.valueOf(getThreadNumber())+".mp3";
 
         System.out.println("Debut du téléchargement de la vidéo du Thread n°"+String.valueOf(getThreadNumber()));
-        p[1] = new ProcessBuilder(cmdYoutubeDl,
+        p = new ProcessBuilder(cmdYoutubeDl,
                 "-i",
                 videoURL,
                 "-o",
                 videoFileDirTemp
         ).start();
-        printProcessOutput(p[1]);
-        p[1].waitFor();
+        printProcessOutput(p);
+        p.waitFor();
         System.out.println("Fin du téléchargement de la vidéo du Thread n°"+String.valueOf(getThreadNumber()));
 
         System.out.println("Début de la conversion audio du Thread n°"+String.valueOf(getThreadNumber()));
-        p[2] = new ProcessBuilder(cmdFfmpeg,
+        p = new ProcessBuilder(cmdFfmpeg,
                 "-i",
                 videoFileDirTemp,
                 audioFileDirTemp
         ).start();
-        printProcessOutput(p[2]);
-        p[2].waitFor();
+        printProcessOutput(p);
+        p.waitFor();
         System.out.println("fin de la conversion audio du Thread n°"+String.valueOf(getThreadNumber()));
 
         System.out.println("Thread n°"+String.valueOf(getThreadNumber())+" Nettoyage...");
@@ -138,25 +153,28 @@ public class ThreadDownloadHelper implements Runnable {
     /**
      * Télécharge la vidéo de l'url passée en parametre vers le dossier également passé en parametre
      * @param videoURL : l'url de la vidéo a télécharger
-     * @param outputPath : le dossier de sortie
      * @throws Exception : Si erreur dans youtube-dl.exe
      */
-    private void getVideo(String videoURL, String outputPath) throws Exception{
-        String cmdYoutubeDl = TEMP_FOLDER+"youtube-dl("+String.valueOf(threadNumber)+").exe";
+    private void getVideo(String videoURL) throws Exception {
+        String cmdYoutubeDl, finalFileDir;
 
-        Process[] p = new Process[2];
-
-        String finalFileDir = outputPath +"\\"+ "%(title)s.%(ext)s";
+        if (isWindowsOS()) {
+            cmdYoutubeDl = TEMP_FOLDER + "youtube-dl" + String.valueOf(threadNumber) + ".exe";
+            finalFileDir = outputPath + "\\" + "%(title)s.%(ext)s";
+        } else {
+            cmdYoutubeDl = TEMP_FOLDER + "youtube-dl" + String.valueOf(threadNumber);
+            finalFileDir = outputPath + "/" + "%(title)s.%(ext)s";
+        }
 
         System.out.println("Debut du téléchargement de la vidéo du Thread n°"+String.valueOf(getThreadNumber()));
-        p[1] = new ProcessBuilder(cmdYoutubeDl,
+        Process p = new ProcessBuilder(cmdYoutubeDl,
                 "-i",
                 videoURL,
                 "-o",
                 finalFileDir
         ).start();
-        printProcessOutput(p[1]);
-        p[1].waitFor();
+        printProcessOutput(p);
+        p.waitFor();
         System.out.println("Fin du téléchargement de la vidéo du Thread n°"+String.valueOf(getThreadNumber()));
     }
 
@@ -183,26 +201,32 @@ public class ThreadDownloadHelper implements Runnable {
     @Override
     public void run() {
 
+
+        File youtubeDl, ffmpeg, destYoutubeDl, destFfmpeg;
+
         // Uses of the right library depending on OS
         if ( isWindowsOS() ) {
             TEMP_FOLDER = System.getProperty("java.io.tmpdir")+"musicExtractorTemp\\";
             outputPath += "\\";
+            youtubeDl = new File("lib\\youtube-dl.exe");
+            ffmpeg = new File("lib\\ffmpeg.exe");
+            destYoutubeDl = new File(TEMP_FOLDER + "youtube-dl" + String.valueOf(getThreadNumber()) + ".exe");
+            destFfmpeg = new File(TEMP_FOLDER + "ffmpeg" + String.valueOf(getThreadNumber()) + ".exe");
         } else {
             TEMP_FOLDER = System.getProperty("java.io.tmpdir")+"musicExtractorTemp/";
             outputPath += "/";
+            youtubeDl = new File("lib/youtube-dl");
+            ffmpeg = new File("lib/ffmpeg");
+            destYoutubeDl = new File(TEMP_FOLDER + "youtube-dl" + String.valueOf(getThreadNumber()));
+            destFfmpeg = new File(TEMP_FOLDER + "ffmpeg" + String.valueOf(getThreadNumber()));
         }
 
-
-        File youtubeDl = new File("lib\\youtube-dl.exe");
-        File ffmpeg = new File("lib\\ffmpeg.exe");
         File tempFolder = new File(TEMP_FOLDER);
         tempFolder.mkdirs();
-        File destYoutubeDl = new File(TEMP_FOLDER+"youtube-dl("+String.valueOf(getThreadNumber())+").exe");
-        File destFfmpeg = new File(TEMP_FOLDER+"ffmpeg("+String.valueOf(getThreadNumber())+").exe");
         try {
-            System.out.println("copie de youtubeDl ("+getThreadNumber()+")");
+            System.out.println("copie de youtubeDl" + getThreadNumber());
             Files.copy(youtubeDl.toPath(), destYoutubeDl.toPath());
-            System.out.println("copie de ffmpeg (" + getThreadNumber() + ")");
+            System.out.println("copie de ffmpeg" + getThreadNumber());
             Files.copy(ffmpeg.toPath(), destFfmpeg.toPath());
         } catch (IOException e) {
             e.printStackTrace();
@@ -211,20 +235,20 @@ public class ThreadDownloadHelper implements Runnable {
         if(isAudioOnly()){
             //Cas audio seul
             try {
-                getAudio(getUrl(),getOutputPath());
+                getAudio(getUrl());
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }else{
             //Cas video
             try {
-                getVideo(getUrl(), getOutputPath());
+                getVideo(getUrl());
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
 
-        System.out.println("Suppression des fichiers ("+getThreadNumber()+")");
+        System.out.println("Suppression des fichiers (" + getThreadNumber() + ")");
         destYoutubeDl.delete();
         destFfmpeg.delete();
         tempFolder.delete();

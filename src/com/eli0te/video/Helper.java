@@ -1,6 +1,7 @@
 package com.eli0te.video;
 
 import com.eli0te.video.view.VideoOverviewController;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -69,7 +70,13 @@ public class Helper {
             infoMap.put("duration", getFormatDuration(line.getInt("duration")));
             infoMap.put("uploader", line.getString("uploader"));
             infoMap.put("videoUrl", line.getString("webpage_url"));
-            infoMap.put("playlistTitle", line.getString("playlist_title"));
+
+            // Si une seule vidéo est retournée par le lien, pas de playlistTitle
+            try {
+                infoMap.put("playlistTitle", line.getString("playlist_title"));
+            } catch (JSONException e) {
+                infoMap.put("playlistTitle", "Not in a playlist");
+            }
 
 
             infoMapList.add(i, infoMap);
@@ -79,7 +86,7 @@ public class Helper {
         return infoMapList;
     }
 
-    public void getAudio(String videoURL, String outputPath) throws Exception {
+    public void getAudio(String videoURL, VideoOverviewController controller, String outputPath) throws Exception {
         Process[] p = new Process[2];
 
         p[0] = new ProcessBuilder(cmd, "--get-filename", videoURL).start();
@@ -99,7 +106,7 @@ public class Helper {
         }
 */
         // Dynamic construction of the outputPath depending on operating system
-        cmd2 = outputPath;
+        cmd2 = controller.getDownloadPath();
         if ( isWindowsOS() ){
             cmd2 += "\\";
         } else {
@@ -134,9 +141,7 @@ public class Helper {
             if ( cmdOutput.contains("[download] ") && cmdOutput.contains("%")  ) {
                 s = cmdOutput.substring("[download] ".length(), cmdOutput.indexOf('%'));
                 if ( s.contains(".") ) // Exclusion du dernier 100% déjà en double
-                    System.out.println(Float.parseFloat(s));
-                    //VideoOverviewController.updateProgress(Double.parseDouble(s));
-                    //TODO : Update progressbar
+                    controller.updateProgress(Double.parseDouble(s));
             }
         }
         in.close();

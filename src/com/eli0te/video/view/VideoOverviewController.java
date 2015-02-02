@@ -44,10 +44,11 @@ public class VideoOverviewController {
     @FXML
     private Button changeDirectory;
     @FXML
-    private static ProgressBar progress;
+    private ProgressBar progress;
     @FXML
     private CheckBox selectAll;
 
+    private Double progressManager;
 
     private MainApp mainApp;
 
@@ -136,6 +137,15 @@ public class VideoOverviewController {
         this.mainApp = mainApp;
 
         videoTable.setItems(mainApp.getVideoData());
+    }
+
+    public boolean selectAllChecked() {
+        return selectAll.isSelected();
+    }
+
+    public void updateProgress(Double value) {
+        progressManager += (value / mainApp.getNbToDownload());
+        progress.setProgress(progressManager);
     }
 
     public String getDownloadPath(){
