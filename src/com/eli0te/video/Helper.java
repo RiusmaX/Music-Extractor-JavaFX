@@ -8,6 +8,9 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by eLi0tE on 16/01/15.
@@ -29,23 +32,38 @@ public class Helper {
         }
     }
 
-    public List<String> getVideosUrls(String playlistURL){
+    public ArrayList<HashMap<String, String>> getPlaylistInfos(String playlistURL){
         List<String> listeUrls = new ArrayList<>();
+        ArrayList<HashMap<String, String>> infoMapList = new ArrayList<>();
+        HashMap<String, String> infoMap = new HashMap<>();
         try{
             Process p = new ProcessBuilder(cmd,"-i","--get-id",playlistURL).start();
             InputStreamReader isr = new InputStreamReader(p.getInputStream());
             BufferedReader in = new BufferedReader(isr);
             String cmdOutput;
+
             while ( (cmdOutput = in.readLine() ) != null ) {
                 System.out.println(cmdOutput);
                 String videoURL = "https://www.youtube.com/watch?v="+cmdOutput;
+
                 listeUrls.add(videoURL);
+            }
+            ExecutorService pool = Executors.newFixedThreadPool(listeUrls.size());
+            for (int i = 0; i < listeUrls.size(); i++) {
+                System.out.println("Ajout du thread " +String.valueOf(i) +" au pool des infos");
+                pool.submit(new ThreadInformations(listeUrls.get(i),i,infoMap));
+            }
+            pool.shutdown();
+            try {
+                pool.awaitTermination(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
 
         }catch (IOException ioe){
             ioe.printStackTrace();
         }
-        return listeUrls;
+        return infoMapList;
     }
 
     public ArrayList<HashMap<String, String>> getInformation(String url) throws Exception{

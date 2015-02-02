@@ -17,7 +17,6 @@ import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * Réalisation du tutoriel [http://code.makery.ch/java/javafx-8-tutorial-part1/] appliqué à la gestion des playlist
@@ -43,7 +42,7 @@ public class MainApp extends Application {
     public void setVideoList(String url){
         try {
             //videoList =  helper.getInformation(url);
-            helper.getVideosUrls(url);
+            helper.getPlaylistInfos(url);
         } catch (Exception e){
             e.printStackTrace();
         }
