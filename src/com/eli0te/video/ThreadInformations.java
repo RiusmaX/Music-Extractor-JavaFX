@@ -18,7 +18,7 @@ public class ThreadInformations implements Runnable {
 
     private static String OS = System.getProperty("os.name").toLowerCase();
 
-    public static String TEMP_FOLDER = System.getProperty("java.io.tmpdir");
+    public String TEMP_FOLDER = System.getProperty("java.io.tmpdir");
 
     private MainApp mainApp;
     private String cmd = "";
@@ -125,24 +125,17 @@ public class ThreadInformations implements Runnable {
 
     @Override
     public void run() {
-        File youtubeDl, destYoutubeDl;
+        File youtubeDlLib, youtubeDest;
 
-        // Uses of the right library depending on OS
-        if ( isWindowsOS() ) {
-            TEMP_FOLDER = System.getProperty("java.io.tmpdir")+"musicExtractorTemp\\";
-            youtubeDl = new File("lib\\youtube-dl.exe");
-            destYoutubeDl = new File(TEMP_FOLDER + "youtube-dl-info.exe");
-        } else {
-            TEMP_FOLDER = System.getProperty("java.io.tmpdir")+"musicExtractorTemp/";
-            youtubeDl = new File("lib/youtube-dl");
-            destYoutubeDl = new File(TEMP_FOLDER + "youtube-dl-info");
-        }
+        if ( isWindowsOS() ) youtubeDlLib = new File("lib\\youtube-dl.exe");
+        else youtubeDlLib = new File("lib/youtube-dl");
+        youtubeDest = new File(cmd);
 
         File tempFolder = new File(TEMP_FOLDER);
         tempFolder.mkdirs();
         try {
-            System.out.println("copie de youtubeDl-info");
-            Files.copy(youtubeDl.toPath(), destYoutubeDl.toPath());
+            System.out.println("copie de youtube-dl-info");
+            Files.copy(youtubeDlLib.toPath(), youtubeDest.toPath());
         } catch (IOException e) {
             e.printStackTrace();
         }

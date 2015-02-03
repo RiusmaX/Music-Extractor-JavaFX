@@ -65,8 +65,7 @@ public class MainApp extends Application {
         } catch (Exception e){
             e.printStackTrace();
         }
-
-    // videoData.setAll(videoList.stream().map(Video::new).collect(Collectors.toList()));
+        // videoData.setAll(videoList.stream().map(Video::new).collect(Collectors.toList()));
 
     }
 
@@ -129,7 +128,7 @@ public class MainApp extends Application {
                 if ( tmpFolder.exists() ){
                     System.out.println(tmpFolder + " -> EXIST !!!");
                     try {
-                        delete(tmpFolder);
+                        deleteFile(tmpFolder);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -191,7 +190,7 @@ public class MainApp extends Application {
         }
     }
 
-    private void delete(File file) throws IOException{
+    public void deleteFile(File file) throws IOException{
         if ( file.isDirectory() ) {
             if ( file.list().length == 0 ) {
                 file.delete();
@@ -202,7 +201,7 @@ public class MainApp extends Application {
                 for ( String tmp : files ) {
                     File fileDelete = new File(file, tmp);
                     // Recursivity :
-                    delete(fileDelete);
+                    deleteFile(fileDelete);
                 }
 
                 if ( file.list().length == 0 ){
