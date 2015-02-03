@@ -14,6 +14,7 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -32,11 +33,23 @@ public class MainApp extends Application {
     private VideoOverviewController controller;
     private ArrayList<HashMap<String, String>> videoList;
     private Helper helper;
-    private int nbToDownload;
 
-    public MainApp(){
+    private static final int downloaderPoolSize = 10;
 
+    private static int managedThreads = 0;
 
+    private static ExecutorService execSvc;
+
+    private static List<VideoDownloader> managedEngines;
+
+    public static List<VideoDownloader> getManagedEngines() {
+        return managedEngines;
+    }
+
+    public MainApp() {
+
+        execSvc = Executors.newFixedThreadPool(downloaderPoolSize);
+        managedEngines = new ArrayList<>();
         helper = new Helper();
         videoList = new ArrayList();
 
@@ -56,30 +69,20 @@ public class MainApp extends Application {
 
     public void download(){
 
-        nbToDownload = 0;
+        ExecutorService executor = Executors.newFixedThreadPool(downloaderPoolSize);
 
         for (int i = 0; i < videoData.size(); i++) {
             if (videoData.get(i).getToDownload()) {
-                nbToDownload++;
+                Runnable dl = new VideoDownloader(videoData.get(i), controller, true, i);
+                executor.execute(dl);
             }
         }
-
-        ExecutorService pool = Executors.newFixedThreadPool(nbToDownload);
-
-        for (int i = 0; i < videoData.size(); i++) {
-            if ( videoData.get(i).getToDownload() ) {
-                System.out.println("Téléchargement de la vidéo : " + videoData.get(i).getVideoTitle());
-                pool.submit(new ThreadDownloadHelper(videoData.get(i).getVideoUrl(), i, true, controller));
-            }
-        }
-        pool.shutdown();
-
+        executor.shutdown();
         try {
-            pool.awaitTermination(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
     }
 
     @Override
@@ -150,10 +153,6 @@ public class MainApp extends Application {
 
     public ObservableList<Video> getVideoData(){
         return videoData;
-    }
-
-    public int getNbToDownload() {
-        return nbToDownload;
     }
 
     public void toogleAll() {
