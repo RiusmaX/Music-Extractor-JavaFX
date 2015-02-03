@@ -64,6 +64,8 @@ public class ThreadInformations implements Runnable {
         int videoNumber = 0;
         HashMap<String, String> infoMap;
 
+        mainApp.clearVideoToList();
+
         //Chaque ligne retourné est égale aux infos d'une vidéos (si playlist, plusieurs lignes)
         while ( (cmdOutput = in.readLine() ) != null ) {
 

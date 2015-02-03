@@ -6,13 +6,11 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Réalisation du tutoriel [http://code.makery.ch/java/javafx-8-tutorial-part1/] appliqué à la gestion des playlist
  *
- * Nous ne sommes pas responsable de l'utilisation du produit faite par l'utilisateur !!!
+ * Nous ne sommes pas responsables de l'utilisation du produit faite par l'utilisateur !!!
  */
 public class MainApp extends Application {
 
@@ -70,7 +68,11 @@ public class MainApp extends Application {
     }
 
     public void addVideoToList(Video video){
-        videoData.add(video);
+        Platform.runLater(() -> videoData.add(video));
+    }
+
+    public void clearVideoToList(){
+        Platform.runLater(() -> videoData.clear());
     }
 
     public void download(){
