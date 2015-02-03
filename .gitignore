@@ -42,5 +42,6 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
+# Added excepted folders list
 out
-.idea/workspace.xml
+.idea
