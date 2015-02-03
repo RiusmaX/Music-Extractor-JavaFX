@@ -12,7 +12,7 @@ import java.util.HashMap;
 
 /**
  * Created by eLi0tE on 16/01/15.
- * Utilisation du programme youtube-dl en python
+ * No more used
  */
 public class Helper {
 

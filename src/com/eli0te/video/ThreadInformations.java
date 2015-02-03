@@ -1,6 +1,6 @@
 package com.eli0te.video;
 
-import com.eli0te.video.view.VideoOverviewController;
+import com.eli0te.video.model.Video;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -8,7 +8,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -19,80 +18,55 @@ public class ThreadInformations implements Runnable {
 
     private static String OS = System.getProperty("os.name").toLowerCase();
 
-    public static String TEMP_FOLDER = "";
+    public static String TEMP_FOLDER = System.getProperty("java.io.tmpdir");
 
-
-    ArrayList<HashMap<String, String>> infoMapList = new ArrayList<>();
-
-    public ArrayList<HashMap<String, String>> getInfoMapList() {
-        return infoMapList;
-    }
-
-    public void setInfoMapList(ArrayList<HashMap<String, String>> infoMapList) {
-        this.infoMapList = infoMapList;
-    }
-
-
-    //threadNumber
-    private int threadNumber;
-    public int getThreadNumber() {
-        return threadNumber;
-    }
-    public void setThreadNumber(int threadNumber) {
-        this.threadNumber = threadNumber;
-    }
+    private MainApp mainApp;
+    private String cmd = "";
 
     //url
     private String url;
-    public String getUrl() {
-        return url;
-    }
     public void setUrl(String url) {
         this.url = url;
     }
 
 
-    public ThreadInformations(String url, int threadNumber, ArrayList<HashMap<String, String>> infoMapList ) {
-        setThreadNumber(threadNumber);
+    public ThreadInformations(String url, MainApp mainApp) {
+        this.mainApp = mainApp;
         setUrl(url);
-        setInfoMapList(infoMapList);
-    }
-
-    public ArrayList<HashMap<String, String>> getInformation(String url) throws Exception{
-
-        String cmd = "";
 
         if ( isWindowsOS() ) {
-            TEMP_FOLDER = System.getProperty("java.io.tmpdir")+"musicExtractorTemp\\";
-            cmd += TEMP_FOLDER +"youtube-dl.exe";
+            TEMP_FOLDER += "musicExtractorTemp\\";
+            cmd += TEMP_FOLDER +"youtube-dl-info.exe";
         } else {
-            TEMP_FOLDER = System.getProperty("java.io.tmpdir")+"musicExtractorTemp/";
-            cmd += TEMP_FOLDER +"youtube-dl";
+            TEMP_FOLDER += "musicExtractorTemp/";
+            cmd += TEMP_FOLDER +"youtube-dl-info";
         }
 
-        Process[] p = new Process[1];
+    }
+
+    public void getInformation(String url) throws Exception {
+
+        Process p;
 
         try {
-            p[0] = new ProcessBuilder(cmd, "-i", "-j", url).start();
+            p = new ProcessBuilder(cmd, "-i", "-j", url).start();
         } catch (IOException e){
-            p[0] = new ProcessBuilder("chmod", "a+x",cmd).start();
-            p[0] = new ProcessBuilder(cmd,"-i", "-j", url).start();
+            p = new ProcessBuilder("chmod", "a+x",cmd).start();
+            p = new ProcessBuilder(cmd,"-i", "-j", url).start();
         }
 
 
-        InputStreamReader is = new InputStreamReader(p[0].getInputStream());
+        InputStreamReader is = new InputStreamReader(p.getInputStream());
 
         BufferedReader in = new BufferedReader( is );
         String cmdOutput;
 
-        int i = 0;
+        int videoNumber = 0;
         HashMap<String, String> infoMap;
-        String duration;
 
         //Chaque ligne retourné est égale aux infos d'une vidéos (si playlist, plusieurs lignes)
         while ( (cmdOutput = in.readLine() ) != null ) {
-            // Traiter cmdOutput (Json)
-            //in.
+
             JSONObject line = new JSONObject(cmdOutput);
 
             infoMap = new HashMap<>();
@@ -103,18 +77,19 @@ public class ThreadInformations implements Runnable {
             infoMap.put("duration", getFormatDuration(line.getInt("duration")));
             infoMap.put("uploader", line.getString("uploader"));
             infoMap.put("videoUrl", line.getString("webpage_url"));
-            infoMap.put("playlistTitle", line.getString("playlist_title"));
+            infoMap.put("videoNumber", String.valueOf(videoNumber));
+            try {
+                infoMap.put("playlistTitle", line.getString("playlist_title"));
+            } catch (Exception e) {
+                infoMap.put("playlistTitle", "Not in a playlist");
+            }
 
-
-            infoMapList.add(i, infoMap);
-            i++;
+            mainApp.addVideoToList(new Video(infoMap));
+            System.out.println(videoNumber + " : Ajout de la vidéo : " + infoMap.get("title") + " à la liste");
+            videoNumber++;
         }
-        System.out.println(i);
-        return infoMapList;
+        return;
     }
-
-
-
 
     private String getFormatDuration(int seconds){
         String formatedDuration = "";
@@ -125,14 +100,8 @@ public class ThreadInformations implements Runnable {
         if (hours > 0) {
             formatedDuration += String.valueOf(hours) + ":";
         }
-
         return formatedDuration += minutes + ":" + seconds;
-
     }
-
-
-
-
 
     /**
      * Redirige la sortie de console du processus passé en parametre dans la sortie du logiciel
@@ -156,24 +125,33 @@ public class ThreadInformations implements Runnable {
 
     @Override
     public void run() {
+        File youtubeDl, destYoutubeDl;
 
-        File youtubeDl = new File("lib\\youtube-dl.exe");
+        // Uses of the right library depending on OS
+        if ( isWindowsOS() ) {
+            TEMP_FOLDER = System.getProperty("java.io.tmpdir")+"musicExtractorTemp\\";
+            youtubeDl = new File("lib\\youtube-dl.exe");
+            destYoutubeDl = new File(TEMP_FOLDER + "youtube-dl-info.exe");
+        } else {
+            TEMP_FOLDER = System.getProperty("java.io.tmpdir")+"musicExtractorTemp/";
+            youtubeDl = new File("lib/youtube-dl");
+            destYoutubeDl = new File(TEMP_FOLDER + "youtube-dl-info");
+        }
+
         File tempFolder = new File(TEMP_FOLDER);
         tempFolder.mkdirs();
-        File destYoutubeDl = new File(TEMP_FOLDER+"youtube-dl("+String.valueOf(getThreadNumber())+").exe");
         try {
-            System.out.println("copie de youtubeDl ("+getThreadNumber()+")");
+            System.out.println("copie de youtubeDl-info");
             Files.copy(youtubeDl.toPath(), destYoutubeDl.toPath());
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        //TODO Appeller getInformations
-
-        
-        System.out.println("Suppression des fichiers (" + getThreadNumber() + ")");
-        destYoutubeDl.delete();
-        tempFolder.delete();
+        try {
+            getInformation(url);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
     }
 }

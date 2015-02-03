@@ -3,22 +3,24 @@ package com.eli0te.video;
 import com.eli0te.video.model.Video;
 import com.eli0te.video.view.VideoOverviewController;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * Réalisation du tutoriel [http://code.makery.ch/java/javafx-8-tutorial-part1/] appliqué à la gestion des playlist
@@ -31,14 +33,10 @@ public class MainApp extends Application {
     private BorderPane rootLayout;
     private ObservableList<Video> videoData = FXCollections.observableArrayList();
     private VideoOverviewController controller;
-    private ArrayList<HashMap<String, String>> videoList;
-    private Helper helper;
 
     private static final int downloaderPoolSize = 10;
 
-    private static int managedThreads = 0;
-
-    private static ExecutorService execSvc;
+    private static ExecutorService execSvcDl, execSvcInfo;
 
     private static List<VideoDownloader> managedEngines;
 
@@ -47,39 +45,48 @@ public class MainApp extends Application {
     }
 
     public MainApp() {
-
-        execSvc = Executors.newFixedThreadPool(downloaderPoolSize);
         managedEngines = new ArrayList<>();
-        helper = new Helper();
-        videoList = new ArrayList();
-
-
     }
 
     public void setVideoList(String url){
         try {
-            videoList =  helper.getInformation(url);
+            execSvcInfo = Executors.newFixedThreadPool(1);
+            Runnable info = new ThreadInformations(url, this);
+
+            execSvcInfo.execute(info);
+            execSvcInfo.shutdown();
+            try {
+                execSvcInfo.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            // videoInfo = new ThreadInformations(url, this);
+            //    videoList =  helper.getInformation(url);
         } catch (Exception e){
             e.printStackTrace();
         }
 
-        videoData.setAll(videoList.stream().map(Video::new).collect(Collectors.toList()));
+    // videoData.setAll(videoList.stream().map(Video::new).collect(Collectors.toList()));
 
+    }
+
+    public void addVideoToList(Video video){
+        videoData.add(video);
     }
 
     public void download(){
 
-        ExecutorService executor = Executors.newFixedThreadPool(downloaderPoolSize);
+        execSvcDl = Executors.newFixedThreadPool(downloaderPoolSize);
 
         for (int i = 0; i < videoData.size(); i++) {
             if (videoData.get(i).getToDownload()) {
                 Runnable dl = new VideoDownloader(videoData.get(i), controller, true, i);
-                executor.execute(dl);
+                execSvcDl.execute(dl);
             }
         }
-        executor.shutdown();
+        execSvcDl.shutdown();
         try {
-            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+            execSvcDl.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -111,6 +118,26 @@ public class MainApp extends Application {
             Scene scene = new Scene(rootLayout);
             primaryStage.setScene(scene);
             primaryStage.show();
+
+            primaryStage.setOnCloseRequest(windowEvent -> {
+                File tmpFolder;
+                if ( System.getProperty("os.name").toLowerCase().indexOf("win") >= 0 ) {
+                    tmpFolder = new File(System.getProperty("java.io.tmpdir") + "musicExtractorTemp\\");
+                } else {
+                    tmpFolder = new File(System.getProperty("java.io.tmpdir") + "musicExtractorTemp/");
+                }
+                if ( tmpFolder.exists() ){
+                    System.out.println(tmpFolder + " -> EXIST !!!");
+                    try {
+                        delete(tmpFolder);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                System.out.println("Nettoyage dossier temporaire");
+                Platform.exit();
+            });
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -161,6 +188,32 @@ public class MainApp extends Application {
                 videoData.get(i).setToDownload(true);
             else
                 videoData.get(i).setToDownload(false);
+        }
+    }
+
+    private void delete(File file) throws IOException{
+        if ( file.isDirectory() ) {
+            if ( file.list().length == 0 ) {
+                file.delete();
+                System.out.println("Suppression du dossier : " + file.getAbsolutePath());
+            } else {
+                String files[] = file.list();
+
+                for ( String tmp : files ) {
+                    File fileDelete = new File(file, tmp);
+                    // Recursivity :
+                    delete(fileDelete);
+                }
+
+                if ( file.list().length == 0 ){
+                    file.delete();
+                    System.out.println("Suppression du dossier : " + file.getAbsolutePath());
+                }
+            }
+        }else{
+            //if file, then delete it
+            file.delete();
+            System.out.println("Suppression du fichier : " + file.getAbsolutePath());
         }
     }
 }
