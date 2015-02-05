@@ -55,6 +55,9 @@ public class VideoOverviewController {
     private Button playButton;
     @FXML
     private Button pauseButton;
+    @FXML
+    private WebView videoEmbed;
+
 
 
     private Double progressManager;
@@ -77,8 +80,11 @@ public class VideoOverviewController {
             videoThumbnail.setImage(new Image(video.getVideoThumbnail(), 640, 360, false, false));
             videoUploader.setText(video.getVideoUploader());
             videoUrl = video.getVideoUrl();
-            playButton.setVisible(true);
+            videoEmbed.setVisible(true);
+            videoEmbed.getEngine().load(getVideoUrl().replace("watch?v=", "embed/") + "?controls=1&showinfo=0&modestbranding=1");
+            videoThumbnail.setVisible(false);
    //         pauseButton.setVisible(true);
+   //         playButton.setVisible(true);
 /*
             try {
                 resource = new URL(video.getVideoUrl());
@@ -96,7 +102,8 @@ public class VideoOverviewController {
             videoDuration.setText("");
             // Insérer le logo du logiciel ici !
             videoThumbnail.setImage(new Image("file:resources/img/logo.png", 512, 512, false, false));
-            videoUploader.setText("");
+            videoUploader.setText("World Of Code");
+            videoEmbed.setVisible(false);
             playButton.setVisible(false);
             pauseButton.setVisible(false);
         }
@@ -159,8 +166,8 @@ public class VideoOverviewController {
         playButton.setGraphic(new ImageView(playImg));
         pauseButton.setGraphic(new ImageView(pauseImg));
 
-        playButton.setOnAction(event -> mainApp.previewVideo());
-        pauseButton.setOnAction(event -> mainApp.download());
+//        playButton.setOnAction(event -> mainApp.previewVideo());
+//        pauseButton.setOnAction(event -> mainApp.download());
     }
 
     /*public static void updateProgress(double progressPercentage){

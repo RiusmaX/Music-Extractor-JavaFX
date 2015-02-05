@@ -16,8 +16,6 @@ import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -67,29 +65,6 @@ public class MainApp extends Application {
                 nbToDownload++;
         }
         return nbToDownload;
-    }
-
-    public void previewVideo(){
-        System.out.println(controller.getVideoUrl());
-        if ( controller.getVideoUrl().contains("youtube") ) {
-            final String finalVideoUrl = controller.getVideoUrl().replace("watch?v=", "embed/") + "?autoplay=1";
-            Application app = new Application() {
-                @Override
-                public void start(Stage stage) throws Exception {
-                    WebView webView = new WebView();
-                    webView.getEngine().load(finalVideoUrl);
-                    webView.setPrefSize(640, 390);
-
-                    stage.setScene(new Scene(webView));
-                    stage.show();
-                }
-            };
-            try {
-                app.start(new Stage());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
     }
 
     public void addVideoToList(Video video){
