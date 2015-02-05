@@ -77,12 +77,19 @@ public class VideoOverviewController {
             videoTitle.setText(video.getVideoTitle());
             videoDescription.setText(video.getVideoDescription());
             videoDuration.setText(video.getVideoDuration());
-            videoThumbnail.setImage(new Image(video.getVideoThumbnail(), 640, 360, false, false));
             videoUploader.setText(video.getVideoUploader());
             videoUrl = video.getVideoUrl();
-            videoEmbed.setVisible(true);
-            videoEmbed.getEngine().load(getVideoUrl().replace("watch?v=", "embed/") + "?controls=1&showinfo=0&modestbranding=1");
-            videoThumbnail.setVisible(false);
+
+            if ( getVideoUrl().contains("youtube") ){
+                videoEmbed.setVisible(true);
+                videoEmbed.getEngine().load(getVideoUrl().replace("watch?v=", "embed/") + "?controls=1&showinfo=0&modestbranding=1");
+                videoThumbnail.setVisible(false);
+            } else {
+                videoThumbnail.setVisible(true);
+                videoThumbnail.setImage(new Image(video.getVideoThumbnail(), 640, 360, false, false));
+                videoEmbed.setVisible(false);
+            }
+
    //         pauseButton.setVisible(true);
    //         playButton.setVisible(true);
 /*
