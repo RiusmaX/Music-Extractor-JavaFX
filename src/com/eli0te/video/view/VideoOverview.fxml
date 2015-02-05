@@ -109,12 +109,16 @@
                                                             <Insets left="65.0" />
                                                          </padding>
                                                       </Label>
-                                                      <Button fx:id="playButton" mnemonicParsing="false" GridPane.rowIndex="3" />
+                                                      <Button fx:id="playButton" mnemonicParsing="false" GridPane.rowIndex="3">
+                                                         <GridPane.margin>
+                                                            <Insets left="90.0" />
+                                                         </GridPane.margin></Button>
                                                       <Button fx:id="pauseButton" mnemonicParsing="false" GridPane.rowIndex="3">
                                                          <GridPane.margin>
-                                                            <Insets left="40.0" />
+                                                            <Insets left="120.0" />
                                                          </GridPane.margin>
                                                       </Button>
+                                                      <Label text="Lire la vidéo :" GridPane.rowIndex="3" />
                                                    </children>
                                                 </GridPane>
                                              </children>

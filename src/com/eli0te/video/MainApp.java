@@ -11,6 +11,7 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 
 import java.io.File;
@@ -38,16 +39,6 @@ public class MainApp extends Application {
 
     private static ExecutorService execSvcDl, execSvcInfo;
 
-    private static List<VideoDownloader> managedEngines;
-
-    public static List<VideoDownloader> getManagedEngines() {
-        return managedEngines;
-    }
-
-    public MainApp() {
-        managedEngines = new ArrayList<>();
-    }
-
     public void setVideoList(String url){
 
         Thread setVideoListThread = new Thread(() -> {
@@ -62,12 +53,9 @@ public class MainApp extends Application {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                // videoInfo = new ThreadInformations(url, this);
-                //    videoList =  helper.getInformation(url);
             } catch (Exception e){
                 e.printStackTrace();
             }
-            // videoData.setAll(videoList.stream().map(Video::new).collect(Collectors.toList()));
         });
         setVideoListThread.start();
     }
@@ -79,6 +67,29 @@ public class MainApp extends Application {
                 nbToDownload++;
         }
         return nbToDownload;
+    }
+
+    public void previewVideo(){
+        System.out.println(controller.getVideoUrl());
+        if ( controller.getVideoUrl().contains("youtube") ) {
+            final String finalVideoUrl = controller.getVideoUrl().replace("watch?v=", "embed/") + "?autoplay=1";
+            Application app = new Application() {
+                @Override
+                public void start(Stage stage) throws Exception {
+                    WebView webView = new WebView();
+                    webView.getEngine().load(finalVideoUrl);
+                    webView.setPrefSize(640, 390);
+
+                    stage.setScene(new Scene(webView));
+                    stage.show();
+                }
+            };
+            try {
+                app.start(new Stage());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public void addVideoToList(Video video){
@@ -182,6 +193,10 @@ public class MainApp extends Application {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void playSound(boolean onPause) {
+
     }
 
     /**

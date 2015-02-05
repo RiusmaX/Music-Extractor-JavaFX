@@ -2,17 +2,18 @@ package com.eli0te.video.view;
 
 import com.eli0te.video.MainApp;
 import com.eli0te.video.model.Video;
+import javafx.application.Application;
 import javafx.fxml.FXML;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
+import javafx.scene.web.WebView;
 import javafx.stage.DirectoryChooser;
+import javafx.stage.Stage;
 
 import java.io.File;
-import java.net.URL;
 
 
 /**
@@ -57,13 +58,9 @@ public class VideoOverviewController {
 
 
     private Double progressManager;
-
+    private String videoUrl;
     private MainApp mainApp;
 
-    private URL resource;
-
-    private Media media;
-    private MediaPlayer player;
 
     /**
      * Fills all text fields to show details about the person.
@@ -79,6 +76,9 @@ public class VideoOverviewController {
             videoDuration.setText(video.getVideoDuration());
             videoThumbnail.setImage(new Image(video.getVideoThumbnail(), 640, 360, false, false));
             videoUploader.setText(video.getVideoUploader());
+            videoUrl = video.getVideoUrl();
+            playButton.setVisible(true);
+   //         pauseButton.setVisible(true);
 /*
             try {
                 resource = new URL(video.getVideoUrl());
@@ -97,6 +97,8 @@ public class VideoOverviewController {
             // Insérer le logo du logiciel ici !
             videoThumbnail.setImage(new Image("file:resources/img/logo.png", 512, 512, false, false));
             videoUploader.setText("");
+            playButton.setVisible(false);
+            pauseButton.setVisible(false);
         }
     }
 
@@ -157,7 +159,7 @@ public class VideoOverviewController {
         playButton.setGraphic(new ImageView(playImg));
         pauseButton.setGraphic(new ImageView(pauseImg));
 
-        playButton.setOnAction(event -> mainApp.download());
+        playButton.setOnAction(event -> mainApp.previewVideo());
         pauseButton.setOnAction(event -> mainApp.download());
     }
 
@@ -183,4 +185,6 @@ public class VideoOverviewController {
     public String getDownloadPath(){
         return downloadPath.getText();
     }
+
+    public String getVideoUrl() { return videoUrl; }
 }
