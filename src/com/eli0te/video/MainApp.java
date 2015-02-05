@@ -90,21 +90,23 @@ public class MainApp extends Application {
     }
 
     public void download(){
+        Thread downloadThread = new Thread(() -> {
+            execSvcDl = Executors.newFixedThreadPool(downloaderPoolSize);
 
-        execSvcDl = Executors.newFixedThreadPool(downloaderPoolSize);
-
-        for (int i = 0; i < videoData.size(); i++) {
-            if (videoData.get(i).getToDownload()) {
-                Runnable dl = new VideoDownloader(videoData.get(i), controller, true, i);
-                execSvcDl.execute(dl);
+            for (int i = 0; i < videoData.size(); i++) {
+                if (videoData.get(i).getToDownload()) {
+                    Runnable dl = new VideoDownloader(videoData.get(i), controller, true, i);
+                    execSvcDl.execute(dl);
+                }
             }
-        }
-        execSvcDl.shutdown();
-        try {
-            execSvcDl.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+            execSvcDl.shutdown();
+            try {
+                execSvcDl.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+        downloadThread.start();
     }
 
     @Override
