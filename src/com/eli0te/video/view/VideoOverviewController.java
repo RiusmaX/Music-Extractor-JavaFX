@@ -176,7 +176,7 @@ public class VideoOverviewController {
     }
 
     public void updateProgress(Double value) {
-//        progressManager += (value / mainApp.getNbToDownload());
+        progressManager += (value / mainApp.getNbToDownload());
         progress.setProgress(progressManager);
     }
 

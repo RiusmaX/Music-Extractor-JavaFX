@@ -32,6 +32,7 @@ public class MainApp extends Application {
     private BorderPane rootLayout;
     private ObservableList<Video> videoData = FXCollections.observableArrayList();
     private VideoOverviewController controller;
+    private int nbToDownload;
 
     private static final int downloaderPoolSize = 10;
 
@@ -69,6 +70,15 @@ public class MainApp extends Application {
             // videoData.setAll(videoList.stream().map(Video::new).collect(Collectors.toList()));
         });
         setVideoListThread.start();
+    }
+
+    public int getNbToDownload (){
+        nbToDownload = 0;
+        for( Video video : videoData ){
+            if ( video.getToDownload() )
+                nbToDownload++;
+        }
+        return nbToDownload;
     }
 
     public void addVideoToList(Video video){
@@ -150,7 +160,7 @@ public class MainApp extends Application {
     }
 
     /**
-     * Shows the person overview inside the root layout.
+     * Shows the video overview inside the root layout.
      */
     public void showVideoOverview() {
         try {
