@@ -8,6 +8,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
@@ -100,6 +101,7 @@ public class MainApp extends Application {
     public void start(Stage primaryStage) {
         this.primaryStage = primaryStage;
         this.primaryStage.setTitle("Music Extractor");
+        this.primaryStage.getIcons().add(new Image("file:resources/images/play.png"));
         this.primaryStage.setMinHeight(768);
         this.primaryStage.setMinWidth(1024);
 
@@ -125,7 +127,7 @@ public class MainApp extends Application {
 
             primaryStage.setOnCloseRequest(windowEvent -> {
                 File tmpFolder;
-                if ( System.getProperty("os.name").toLowerCase().indexOf("win") >= 0 ) {
+                if (System.getProperty("os.name").toLowerCase().contains("win")) {
                     tmpFolder = new File(System.getProperty("java.io.tmpdir") + "musicExtractorTemp\\");
                 } else {
                     tmpFolder = new File(System.getProperty("java.io.tmpdir") + "musicExtractorTemp/");
@@ -158,7 +160,7 @@ public class MainApp extends Application {
             AnchorPane videoOverview = loader.load();
 
 
-            // Set person overview into the center of root layout.
+            // Set video overview into the center of root layout.
             rootLayout.setCenter(videoOverview);
 
             // Give the controller access to the main app.

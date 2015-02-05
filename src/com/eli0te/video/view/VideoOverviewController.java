@@ -7,9 +7,12 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.stage.DirectoryChooser;
 
 import java.io.File;
+import java.net.URL;
 
 
 /**
@@ -47,10 +50,20 @@ public class VideoOverviewController {
     private ProgressBar progress;
     @FXML
     private CheckBox selectAll;
+    @FXML
+    private Button playButton;
+    @FXML
+    private Button pauseButton;
+
 
     private Double progressManager;
 
     private MainApp mainApp;
+
+    private URL resource;
+
+    private Media media;
+    private MediaPlayer player;
 
     /**
      * Fills all text fields to show details about the person.
@@ -64,15 +77,25 @@ public class VideoOverviewController {
             videoTitle.setText(video.getVideoTitle());
             videoDescription.setText(video.getVideoDescription());
             videoDuration.setText(video.getVideoDuration());
-            videoThumbnail.setImage(new Image(video.getVideoThumbnail()));
+            videoThumbnail.setImage(new Image(video.getVideoThumbnail(), 640, 360, false, false));
             videoUploader.setText(video.getVideoUploader());
+/*
+            try {
+                resource = new URL(video.getVideoUrl());
+                media = new Media(resource.toString());
+                player = new MediaPlayer(media);
+                player.play();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+*/
         } else {
             // Person is null, remove all the text.
             videoTitle.setText("Bienvenue sur Music Extractor");
             videoDescription.setText("Entrez le lien dans la barre en haut plus cliquez sur valider ! ");
             videoDuration.setText("");
             // Insérer le logo du logiciel ici !
-            videoThumbnail.setImage(new Image("https://lh4.googleusercontent.com/-4QDxins1Vgw/AAAAAAAAAAI/AAAAAAAAlN0/jL-wM5HIagA/s120-c/photo.jpg"));
+            videoThumbnail.setImage(new Image("file:resources/img/logo.png", 512, 512, false, false));
             videoUploader.setText("");
         }
     }
@@ -127,6 +150,15 @@ public class VideoOverviewController {
             } catch (NullPointerException e) {
             }
         });
+
+        Image playImg = new Image("file:resources/img/play.png", 20, 20, false, false);
+        Image pauseImg = new Image("file:resources/img/pause.png", 20, 20, false, false);
+
+        playButton.setGraphic(new ImageView(playImg));
+        pauseButton.setGraphic(new ImageView(pauseImg));
+
+        playButton.setOnAction(event -> mainApp.download());
+        pauseButton.setOnAction(event -> mainApp.download());
     }
 
     /*public static void updateProgress(double progressPercentage){
