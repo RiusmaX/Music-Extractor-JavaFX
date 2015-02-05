@@ -47,24 +47,27 @@ public class MainApp extends Application {
     }
 
     public void setVideoList(String url){
-        try {
-            execSvcInfo = Executors.newFixedThreadPool(1);
-            Runnable info = new ThreadInformations(url, this);
 
-            execSvcInfo.execute(info);
-            execSvcInfo.shutdown();
+        Thread setVideoListThread = new Thread(() -> {
             try {
-                execSvcInfo.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-            } catch (InterruptedException e) {
+                execSvcInfo = Executors.newFixedThreadPool(1);
+                Runnable info = new ThreadInformations(url, this);
+
+                execSvcInfo.execute(info);
+                execSvcInfo.shutdown();
+                try {
+                    execSvcInfo.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                // videoInfo = new ThreadInformations(url, this);
+                //    videoList =  helper.getInformation(url);
+            } catch (Exception e){
                 e.printStackTrace();
             }
-            // videoInfo = new ThreadInformations(url, this);
-            //    videoList =  helper.getInformation(url);
-        } catch (Exception e){
-            e.printStackTrace();
-        }
-        // videoData.setAll(videoList.stream().map(Video::new).collect(Collectors.toList()));
-
+            // videoData.setAll(videoList.stream().map(Video::new).collect(Collectors.toList()));
+        });
+        setVideoListThread.start();
     }
 
     public void addVideoToList(Video video){
