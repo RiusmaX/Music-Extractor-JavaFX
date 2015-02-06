@@ -11,11 +11,11 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -79,10 +79,13 @@ public class MainApp extends Application {
         Thread downloadThread = new Thread(() -> {
             execSvcDl = Executors.newFixedThreadPool(downloaderPoolSize);
 
+            int j = 0;
+            controller.resetProgressManager();
             for (int i = 0; i < videoData.size(); i++) {
                 if (videoData.get(i).getToDownload()) {
-                    Runnable dl = new VideoDownloader(videoData.get(i), controller, true, i);
+                    Runnable dl = new VideoDownloader(videoData.get(i), controller, this, true, i, j);
                     execSvcDl.execute(dl);
+                    j++;
                 }
             }
             execSvcDl.shutdown();

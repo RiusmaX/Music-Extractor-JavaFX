@@ -14,6 +14,11 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 
 /**
@@ -58,12 +63,16 @@ public class VideoOverviewController {
     @FXML
     private WebView videoEmbed;
 
-
-
-    private Double progressManager;
+    private List<Double> progressManager;
+    private Double[] res;
     private String videoUrl;
     private MainApp mainApp;
 
+    public void resetProgressManager() {
+        res = new Double[mainApp.getNbToDownload()];
+        for (int i = 0; i < mainApp.getNbToDownload();i++)
+            res[i] = 0.0;
+    }
 
     /**
      * Fills all text fields to show details about the person.
@@ -80,9 +89,9 @@ public class VideoOverviewController {
             videoUploader.setText(video.getVideoUploader());
             videoUrl = video.getVideoUrl();
 
-            if ( getVideoUrl().contains("youtube") ){
+            if ( videoUrl.contains("youtube") ){
                 videoEmbed.setVisible(true);
-                videoEmbed.getEngine().load(getVideoUrl().replace("watch?v=", "embed/") + "?controls=1&showinfo=0&modestbranding=1");
+                videoEmbed.getEngine().load(videoUrl.replace("watch?v=", "embed/") + "?controls=1&showinfo=0&modestbranding=1&autohide=1");
                 videoThumbnail.setVisible(false);
             } else {
                 videoThumbnail.setVisible(true);
@@ -177,10 +186,6 @@ public class VideoOverviewController {
 //        pauseButton.setOnAction(event -> mainApp.download());
     }
 
-    /*public static void updateProgress(double progressPercentage){
-        progress.setProgress(progressPercentage);
-    }*/
-
     public void setMainApp(MainApp mainApp){
         this.mainApp = mainApp;
 
@@ -191,14 +196,17 @@ public class VideoOverviewController {
         return selectAll.isSelected();
     }
 
-    public void updateProgress(Double value) {
-        progressManager += (value / mainApp.getNbToDownload());
-        progress.setProgress(progressManager);
+    public synchronized void updateProgress(Double value, int videoId) {
+        res[videoId] = value;
+        Double res2 = 0.0;
+        for (int i = 0; i < mainApp.getNbToDownload(); i++) {
+            res2 += res[i];
+        }
+        res2 = (res2 / mainApp.getNbToDownload()) / 100;
+        progress.setProgress(res2);
     }
 
     public String getDownloadPath(){
         return downloadPath.getText();
     }
-
-    public String getVideoUrl() { return videoUrl; }
 }

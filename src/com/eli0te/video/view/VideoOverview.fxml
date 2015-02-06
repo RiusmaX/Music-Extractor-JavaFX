@@ -68,7 +68,7 @@
                                               <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                             </rowConstraints>
                                              <children>
-                                                <ImageView id="videoThumbnail" fx:id="videoThumbnail" fitWidth="256.0" pickOnBounds="true" preserveRatio="true" GridPane.valignment="CENTER">
+                                                <ImageView id="videoThumbnail" fx:id="videoThumbnail" fitWidth="256.0" pickOnBounds="true" preserveRatio="true" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
                                                    <viewport>
                                                       <Rectangle2D height="512.0" width="640.0" />
                                                    </viewport>
@@ -119,7 +119,7 @@
                                                             <Insets left="120.0" />
                                                          </GridPane.margin>
                                                       </Button>
-                                                      <Label text="Lire la vidéo :" GridPane.rowIndex="3" />
+                                                      <Label text="Lire la vidéo :" visible="false" GridPane.rowIndex="3" />
                                                    </children>
                                                 </GridPane>
                                                 <WebView fx:id="videoEmbed" prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="2" />

@@ -21,14 +21,11 @@ public class VideoDownloader implements Runnable {
     private Video video;
 
     private int videoNumber;
+    private int videoId;
 
     private Process p;
 
     public static String TEMP_FOLDER = "";
-
-    public static final String TERMINATED_STATUS = "Terminated";
-
-    public static final String ERROR_STATUS = "Error";
 
     //audioOnly
     private boolean audioOnly;
@@ -38,14 +35,19 @@ public class VideoDownloader implements Runnable {
     //videoController
     private VideoOverviewController controller;
 
+    // Main App
+    MainApp main;
+
 
     String cmd;
-
-    public VideoDownloader(Video video, VideoOverviewController controller, boolean audioOnly, int videoNumber) {
+    // VidéoNumber, numéro de la vidéo dans le liste de toutes les vidéos et videoId numéro de la vidéo dans la liste des vidéo à DL
+    public VideoDownloader(Video video, VideoOverviewController controller, MainApp main, boolean audioOnly, int videoNumber, int videoId) {
         setAudioOnly(audioOnly);
         this.videoNumber = videoNumber;
         this.video = video;
         this.controller = controller;
+        this.main = main;
+        this.videoId = videoId;
     }
 
     public void download() throws Exception {
@@ -81,6 +83,22 @@ public class VideoDownloader implements Runnable {
                 "-o",
                 videoFileDirTemp
         ).start();
+
+        BufferedReader in = new BufferedReader( new InputStreamReader(p.getInputStream()) );
+
+        String cmdOutput;
+        String s;
+
+        // Parsing download progress :
+        while ( (cmdOutput = in.readLine()) != null ) {
+            if ( cmdOutput.contains("[download] ") && cmdOutput.contains("%")  ) {
+                s = cmdOutput.substring("[download] ".length(), cmdOutput.indexOf('%'));
+                if ( s.contains(".") ) // Exclude last doubling 100%
+                    controller.updateProgress(Double.parseDouble(s), videoId );
+            }
+        }
+        in.close();
+
         printProcessOutput(p);
         p.waitFor();
         System.out.println("Fin du téléchargement de la vidéo  : " + video.getVideoTitle());
@@ -140,18 +158,18 @@ public class VideoDownloader implements Runnable {
      * Redirige la sortie de console du processus passé en parametre dans la sortie du logiciel
      * @param p : le processus dont la sortie doit être redirigée
      */
-    private void printProcessOutput(Process p){
+    private void printProcessOutput(Process p) throws IOException {
         BufferedReader in = new BufferedReader( new InputStreamReader(p.getInputStream()));
         String cmdOutput;
         try {
             while ( (cmdOutput = in.readLine()) != null ) { System.out.println(cmdOutput); }
-        } catch (IOException e) {
-            e.printStackTrace();
+        } finally {
+            in.close();
         }
     }
 
     private static boolean isWindowsOS(){
-        if ( OS.indexOf("win") >= 0 )
+        if (OS.contains("win"))
             return true;
         return false;
     }

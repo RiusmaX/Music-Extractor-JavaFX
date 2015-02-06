@@ -140,8 +140,8 @@ public class Helper {
             System.out.println(cmdOutput);
             if ( cmdOutput.contains("[download] ") && cmdOutput.contains("%")  ) {
                 s = cmdOutput.substring("[download] ".length(), cmdOutput.indexOf('%'));
-                if ( s.contains(".") ) // Exclusion du dernier 100% déjà en double
-                    controller.updateProgress(Double.parseDouble(s));
+             //   if ( s.contains(".") ) // Exclusion du dernier 100% déjà en double
+                //    controller.updateProgress(Double.parseDouble(s));
             }
         }
         in.close();
