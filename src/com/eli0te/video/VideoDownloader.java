@@ -122,7 +122,7 @@ public class VideoDownloader implements Runnable {
         }
         if (dlVideo){
             fvideo.renameTo(new File(finalFileDir.replace("mp3", "mp4")));
-        } else
+        }
         if(fvideo.exists()){
             fvideo.delete();
         }
