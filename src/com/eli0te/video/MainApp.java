@@ -50,7 +50,7 @@ public class MainApp extends Application {
 
     public void setVideoList(String url){
 
-        if (url.contains(" ")){
+        if ( !url.contains("http") || !url.contains(".")){
             url = "https://www.youtube.com/results?search_query=" + url.replace(" ", "+");
         }
 
