@@ -119,7 +119,8 @@ public class VideoDownloader implements Runnable {
             if (faudioTemp.exists()) {
                 faudioTemp.renameTo(new File(finalFileDir));
             }
-        } else if (dlVideo){
+        }
+        if (dlVideo){
             fvideo.renameTo(new File(finalFileDir.replace("mp3", "mp4")));
         } else
         if(fvideo.exists()){

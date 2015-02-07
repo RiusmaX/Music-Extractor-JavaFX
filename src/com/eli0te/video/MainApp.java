@@ -37,9 +37,14 @@ public class MainApp extends Application {
 
     private static ExecutorService execSvcDl, execSvcInfo;
 
-    private void showErrorDialogMessage(String s){
+    /**
+     *
+     * @param s : String to show in dialog
+     * @param dialogType : type of dialog you want to show
+     */
+    private void showDialog(String s, Alert.AlertType dialogType){
         Platform.runLater(() -> {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
+            Alert alert = new Alert(dialogType);
             alert.setTitle("Problème détecté !");
             alert.setHeaderText(null);
             alert.setContentText(s);
@@ -96,7 +101,7 @@ public class MainApp extends Application {
     public void download(){
 
         if ( !controller.getAudio() && !controller.getVideo() ) {
-            showErrorDialogMessage("Veuillez sélectionner votre choix de téléchargement (Audio et/ou Vidéo) ! ");
+            showDialog("Veuillez sélectionner votre choix de téléchargement (Audio et/ou Vidéo) ! ", Alert.AlertType.WARNING);
             return;
         }
 
