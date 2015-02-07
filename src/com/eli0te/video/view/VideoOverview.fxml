@@ -26,7 +26,7 @@
                       <RowConstraints fillHeight="false" maxHeight="-Infinity" minHeight="30.0" prefHeight="30.0" valignment="CENTER" vgrow="ALWAYS" />
                     </rowConstraints>
                      <children>
-                        <TextField id="videoUrl" fx:id="url" promptText="Lien de la vidéo ou de la playlist" GridPane.valignment="BOTTOM" />
+                        <TextField id="videoUrl" fx:id="url" promptText="Lien de la vidéo ou de la playlist" GridPane.valignment="BOTTOM" onAction="#onEnter" />
                         <Button fx:id="validate" mnemonicParsing="false" text="Valider" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.valignment="BOTTOM" />
                      </children>
                   </GridPane>

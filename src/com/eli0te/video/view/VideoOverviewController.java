@@ -11,12 +11,14 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.web.WebView;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import sun.applet.Main;
 
 import java.io.File;
 
@@ -112,6 +114,22 @@ public class VideoOverviewController {
             mainApp.setVideoList(url.getText());
 
         });
+
+        videoTable.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+                public void handle(MouseEvent click) {
+                if (click.getClickCount() == 2) {
+                    Video videoSelected = videoTable.getSelectionModel().getSelectedItem();
+                    for (int i=0;i<videoTable.getItems().size();i++){
+                        videoTable.getItems().get(i).setToDownload(false);
+                    }
+                    videoSelected.setToDownload(true);
+                    mainApp.download();
+                }
+            }
+        });
+
+
 
         // Download button handler
         download.setOnAction(event -> mainApp.download());
@@ -211,6 +229,10 @@ public class VideoOverviewController {
         }
         res2 = (res2 / mainApp.getNbToDownload()) / 100;
         progress.setProgress(res2);
+    }
+
+    public void onEnter(){
+        mainApp.setVideoList(url.getText());
     }
 
     public String getDownloadPath(){

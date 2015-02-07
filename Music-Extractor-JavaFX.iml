@@ -9,5 +9,6 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="org.json:json:20141113" level="project" />
     <orderEntry type="library" name="org.controlsfx:openjfx-dialogs:1.0.2" level="project" />
+    <orderEntry type="library" name="openjfx-dialogs-1.0.2" level="project" />
   </component>
 </module>
