@@ -27,10 +27,8 @@ public class VideoDownloader implements Runnable {
 
     public static String TEMP_FOLDER = "";
 
-    //audioOnly
-    private boolean audioOnly;
-    public boolean isAudioOnly() { return audioOnly; }
-    public void setAudioOnly(boolean audioOnly) { this.audioOnly = audioOnly; }
+    private boolean dlAudio;
+    private boolean dlVideo;
 
     //videoController
     private VideoOverviewController controller;
@@ -41,8 +39,9 @@ public class VideoDownloader implements Runnable {
 
     String cmd;
     // VidéoNumber, numéro de la vidéo dans le liste de toutes les vidéos et videoId numéro de la vidéo dans la liste des vidéo à DL
-    public VideoDownloader(Video video, VideoOverviewController controller, MainApp main, boolean audioOnly, int videoNumber, int videoId) {
-        setAudioOnly(audioOnly);
+    public VideoDownloader(Video video, VideoOverviewController controller, MainApp main, boolean dlVideo, boolean dlAudio, int videoNumber, int videoId) {
+        this.dlAudio = dlAudio;
+        this.dlVideo = dlVideo;
         this.videoNumber = videoNumber;
         this.video = video;
         this.controller = controller;
@@ -101,7 +100,7 @@ public class VideoDownloader implements Runnable {
 
         System.out.println("Fin du téléchargement de la vidéo  : " + video.getVideoTitle());
 
-        if (isAudioOnly()) {
+        if (dlAudio) {
             System.out.println("Début de la conversion audio de la video : " + video.getVideoTitle());
             p = new ProcessBuilder(cmdFfmpeg,
                     "-i",
@@ -115,15 +114,14 @@ public class VideoDownloader implements Runnable {
 
         System.out.println("Nettoyage des fichiers de la vidéo : " + video.getVideoTitle());
         File fvideo = new File(videoFileDirTemp);
-        if (isAudioOnly()) {
+        if (dlAudio) {
             File faudioTemp = new File(audioFileDirTemp);
             if (faudioTemp.exists()) {
                 faudioTemp.renameTo(new File(finalFileDir));
             }
-        } else {
+        } else if (dlVideo){
             fvideo.renameTo(new File(finalFileDir.replace("mp3", "mp4")));
-        }
-
+        } else
         if(fvideo.exists()){
             fvideo.delete();
         }
@@ -181,6 +179,7 @@ public class VideoDownloader implements Runnable {
     public void run() {
 
 
+
         File youtubeDl, ffmpeg, destYoutubeDl, destFfmpeg;
 
         // Uses of the right library depending on OS
@@ -203,7 +202,7 @@ public class VideoDownloader implements Runnable {
         try {
             System.out.println("copie de youtubeDl" + videoNumber);
             Files.copy(youtubeDl.toPath(), destYoutubeDl.toPath());
-            if ( isAudioOnly() ) {
+            if ( dlAudio ) {
                 System.out.println("copie de ffmpeg" + videoNumber);
                 Files.copy(ffmpeg.toPath(), destFfmpeg.toPath());
             }

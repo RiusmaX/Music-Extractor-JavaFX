@@ -2,23 +2,23 @@ package com.eli0te.video.view;
 
 import com.eli0te.video.MainApp;
 import com.eli0te.video.model.Video;
-import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import javafx.scene.web.WebView;
 import javafx.stage.DirectoryChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 
 /**
@@ -62,68 +62,15 @@ public class VideoOverviewController {
     private Button pauseButton;
     @FXML
     private WebView videoEmbed;
+    @FXML
+    private CheckBox downloadVideo;
+    @FXML
+    private CheckBox downloadAudio;
 
-    private List<Double> progressManager;
-    private Double[] res;
+
+    private Double[] tabProgressManager;
     private String videoUrl;
     private MainApp mainApp;
-
-    public void resetProgressManager() {
-        res = new Double[mainApp.getNbToDownload()];
-        for (int i = 0; i < mainApp.getNbToDownload();i++)
-            res[i] = 0.0;
-    }
-
-    /**
-     * Fills all text fields to show details about the person.
-     * If the specified person is null, all text fields are cleared.
-     *
-     * @param video the video or null
-     */
-    private void setVideoDetails(Video video) {
-        if (video != null) {
-            // Fill the labels with info from the video object.
-            videoTitle.setText(video.getVideoTitle());
-            videoDescription.setText(video.getVideoDescription());
-            videoDuration.setText(video.getVideoDuration());
-            videoUploader.setText(video.getVideoUploader());
-            videoUrl = video.getVideoUrl();
-
-            if ( videoUrl.contains("youtube") ){
-                videoEmbed.setVisible(true);
-                videoEmbed.getEngine().load(videoUrl.replace("watch?v=", "embed/") + "?controls=1&showinfo=0&modestbranding=1&autohide=1");
-                videoThumbnail.setVisible(false);
-            } else {
-                videoThumbnail.setVisible(true);
-                videoThumbnail.setImage(new Image(video.getVideoThumbnail(), 640, 360, false, false));
-                videoEmbed.setVisible(false);
-            }
-
-   //         pauseButton.setVisible(true);
-   //         playButton.setVisible(true);
-/*
-            try {
-                resource = new URL(video.getVideoUrl());
-                media = new Media(resource.toString());
-                player = new MediaPlayer(media);
-                player.play();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-*/
-        } else {
-            // Person is null, remove all the text.
-            videoTitle.setText("Bienvenue sur Music Extractor");
-            videoDescription.setText("Entrez le lien dans la barre en haut plus cliquez sur valider ! ");
-            videoDuration.setText("");
-            // Insérer le logo du logiciel ici !
-            videoThumbnail.setImage(new Image("file:resources/img/logo.png", 512, 512, false, false));
-            videoUploader.setText("World Of Code");
-            videoEmbed.setVisible(false);
-            playButton.setVisible(false);
-            pauseButton.setVisible(false);
-        }
-    }
 
     /**
      * The constructor.
@@ -158,10 +105,13 @@ public class VideoOverviewController {
         videoTable.setEditable(true);
 
         // SelectAll checkbox handler
-        selectAll.setOnAction(event -> mainApp.toogleAll());
+        selectAll.setOnAction(event -> mainApp.toggleAll());
 
         // Validate button handler
-        validate.setOnAction(event -> mainApp.setVideoList(url.getText()));
+        validate.setOnAction(event -> {
+            mainApp.setVideoList(url.getText());
+
+        });
 
         // Download button handler
         download.setOnAction(event -> mainApp.download());
@@ -186,6 +136,63 @@ public class VideoOverviewController {
 //        pauseButton.setOnAction(event -> mainApp.download());
     }
 
+    /**
+     * Fills all text fields to show details about the person.
+     * If the specified person is null, all text fields are cleared.
+     *
+     * @param video the video or null
+     */
+    private void setVideoDetails(Video video) {
+        if (video != null) {
+            // Fill the labels with info from the video object.
+            videoTitle.setText(video.getVideoTitle());
+            videoDescription.setText(video.getVideoDescription());
+            videoDuration.setText(video.getVideoDuration());
+            videoUploader.setText(video.getVideoUploader());
+            videoUrl = video.getVideoUrl();
+
+            if ( videoUrl.contains("youtube") ){
+                videoEmbed.setVisible(true);
+                videoEmbed.getEngine().load(videoUrl.replace("watch?v=", "embed/") + "?controls=1&showinfo=0&modestbranding=1&autohide=1");
+                videoThumbnail.setVisible(false);
+            } else {
+                videoThumbnail.setVisible(true);
+                videoThumbnail.setImage(new Image(video.getVideoThumbnail(), 640, 360, false, false));
+                videoEmbed.setVisible(false);
+            }
+
+            //         pauseButton.setVisible(true);
+            //         playButton.setVisible(true);
+
+        } else {
+            // Person is null, remove all the text.
+            videoTitle.setText("Bienvenue sur Music Extractor");
+            videoDescription.setText("Entrez le lien dans la barre en haut plus cliquez sur valider ! ");
+            videoDuration.setText("");
+            // Insérer le logo du logiciel ici !
+            videoThumbnail.setImage(new Image("file:resources/img/logo.png", 512, 512, false, false));
+            videoThumbnail.setVisible(true);
+            videoUploader.setText("World Of Code");
+            videoEmbed.setVisible(false);
+            playButton.setVisible(false);
+            pauseButton.setVisible(false);
+        }
+    }
+
+    public boolean getVideo(){
+        return downloadVideo.isSelected();
+    }
+
+    public boolean getAudio(){
+        return downloadAudio.isSelected();
+    }
+
+    public void resetProgressManager() {
+        tabProgressManager = new Double[mainApp.getNbToDownload()];
+        for ( int i = 0; i < mainApp.getNbToDownload(); i++ )
+            tabProgressManager[i] = 0.0;
+    }
+
     public void setMainApp(MainApp mainApp){
         this.mainApp = mainApp;
 
@@ -197,10 +204,10 @@ public class VideoOverviewController {
     }
 
     public synchronized void updateProgress(Double value, int videoId) {
-        res[videoId] = value;
+        tabProgressManager[videoId] = value;
         Double res2 = 0.0;
         for (int i = 0; i < mainApp.getNbToDownload(); i++) {
-            res2 += res[i];
+            res2 += tabProgressManager[i];
         }
         res2 = (res2 / mainApp.getNbToDownload()) / 100;
         progress.setProgress(res2);

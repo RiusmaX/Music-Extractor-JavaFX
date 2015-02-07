@@ -8,6 +8,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
@@ -15,7 +16,6 @@ import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -37,12 +37,30 @@ public class MainApp extends Application {
 
     private static ExecutorService execSvcDl, execSvcInfo;
 
+    private void showErrorDialogMessage(String s){
+        Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Problème détecté !");
+            alert.setHeaderText(null);
+            alert.setContentText(s);
+
+            alert.showAndWait();
+        });
+    }
+
     public void setVideoList(String url){
+
+        if (url.contains(" ")){
+            url = "https://www.youtube.com/results?search_query=" + url.replace(" ", "+");
+        }
+
+
+        final String finalUrl = url;
 
         Thread setVideoListThread = new Thread(() -> {
             try {
                 execSvcInfo = Executors.newFixedThreadPool(1);
-                Runnable info = new ThreadInformations(url, this);
+                Runnable info = new ThreadInformations(finalUrl, this);
 
                 execSvcInfo.execute(info);
                 execSvcInfo.shutdown();
@@ -72,10 +90,16 @@ public class MainApp extends Application {
     }
 
     public void clearVideoToList(){
-        Platform.runLater(() -> videoData.clear());
+        Platform.runLater(videoData::clear);
     }
 
     public void download(){
+
+        if ( !controller.getAudio() && !controller.getVideo() ) {
+            showErrorDialogMessage("Veuillez sélectionner votre choix de téléchargement (Audio et/ou Vidéo) ! ");
+            return;
+        }
+
         Thread downloadThread = new Thread(() -> {
             execSvcDl = Executors.newFixedThreadPool(downloaderPoolSize);
 
@@ -83,7 +107,7 @@ public class MainApp extends Application {
             controller.resetProgressManager();
             for (int i = 0; i < videoData.size(); i++) {
                 if (videoData.get(i).getToDownload()) {
-                    Runnable dl = new VideoDownloader(videoData.get(i), controller, this, true, i, j);
+                    Runnable dl = new VideoDownloader(videoData.get(i), controller, this, controller.getVideo(), controller.getAudio(), i, j);
                     execSvcDl.execute(dl);
                     j++;
                 }
@@ -133,7 +157,7 @@ public class MainApp extends Application {
                 } else {
                     tmpFolder = new File(System.getProperty("java.io.tmpdir") + "musicExtractorTemp/");
                 }
-                if ( tmpFolder.exists() ){
+                if (tmpFolder.exists()) {
                     System.out.println(tmpFolder + " -> EXIST !!!");
                     try {
                         deleteFile(tmpFolder);
@@ -173,14 +197,6 @@ public class MainApp extends Application {
         }
     }
 
-    public void playSound(boolean onPause) {
-
-    }
-
-    /**
-     * Returns the main stage.
-     * @return
-     */
     public Stage getPrimaryStage() {
         return primaryStage;
     }
@@ -193,7 +209,7 @@ public class MainApp extends Application {
         return videoData;
     }
 
-    public void toogleAll() {
+    public void toggleAll() {
         for (int i = 0; i < videoData.size(); i++){
             if (controller.selectAllChecked())
                 videoData.get(i).setToDownload(true);

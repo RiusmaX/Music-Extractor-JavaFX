@@ -156,6 +156,20 @@
                                           <Insets left="10.0" />
                                        </GridPane.margin>
                                     </Button>
+                                    <Label text="Garder le son      / la vidéo" GridPane.columnIndex="1" GridPane.halignment="RIGHT">
+                                       <GridPane.margin>
+                                          <Insets right="25.0" />
+                                       </GridPane.margin></Label>
+                                    <CheckBox fx:id="downloadAudio" mnemonicParsing="false" selected="true" GridPane.columnIndex="1" GridPane.halignment="RIGHT">
+                                       <GridPane.margin>
+                                          <Insets right="75.0" />
+                                       </GridPane.margin>
+                                    </CheckBox>
+                                    <CheckBox fx:id="downloadVideo" mnemonicParsing="false" GridPane.columnIndex="1" GridPane.halignment="RIGHT">
+                                       <GridPane.margin>
+                                          <Insets />
+                                       </GridPane.margin>
+                                    </CheckBox>
                                  </children>
                               </GridPane>
                            </children>
