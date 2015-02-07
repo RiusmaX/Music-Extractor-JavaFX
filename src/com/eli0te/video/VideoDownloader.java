@@ -99,8 +99,6 @@ public class VideoDownloader implements Runnable {
         }
         in.close();
 
-        printProcessOutput(p);
-        p.waitFor();
         System.out.println("Fin du téléchargement de la vidéo  : " + video.getVideoTitle());
 
         if (isAudioOnly()) {
@@ -122,6 +120,8 @@ public class VideoDownloader implements Runnable {
             if (faudioTemp.exists()) {
                 faudioTemp.renameTo(new File(finalFileDir));
             }
+        } else {
+            fvideo.renameTo(new File(finalFileDir.replace("mp3", "mp4")));
         }
 
         if(fvideo.exists()){
@@ -158,13 +158,15 @@ public class VideoDownloader implements Runnable {
      * Redirige la sortie de console du processus passé en parametre dans la sortie du logiciel
      * @param p : le processus dont la sortie doit être redirigée
      */
-    private void printProcessOutput(Process p) throws IOException {
+    private void printProcessOutput(Process p) {
         BufferedReader in = new BufferedReader( new InputStreamReader(p.getInputStream()));
         String cmdOutput;
         try {
-            while ( (cmdOutput = in.readLine()) != null ) { System.out.println(cmdOutput); }
-        } finally {
-            in.close();
+            while ((cmdOutput = in.readLine()) != null) {
+                System.out.println(cmdOutput);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -201,8 +203,10 @@ public class VideoDownloader implements Runnable {
         try {
             System.out.println("copie de youtubeDl" + videoNumber);
             Files.copy(youtubeDl.toPath(), destYoutubeDl.toPath());
-            System.out.println("copie de ffmpeg" + videoNumber);
-            Files.copy(ffmpeg.toPath(), destFfmpeg.toPath());
+            if ( isAudioOnly() ) {
+                System.out.println("copie de ffmpeg" + videoNumber);
+                Files.copy(ffmpeg.toPath(), destFfmpeg.toPath());
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
