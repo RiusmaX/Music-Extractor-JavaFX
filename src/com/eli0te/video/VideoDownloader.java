@@ -202,7 +202,7 @@ public class VideoDownloader implements Runnable {
             File tempFolder = new File(TEMP_FOLDER);
             tempFolder.mkdirs();
 
-            isYoutubeDl = this.getClass().getClassLoader().getResourceAsStream("lib\\youtube-dl.exe");
+            isYoutubeDl = this.getClass().getClassLoader().getResourceAsStream("lib/youtube-dl.exe");
             try {
                 fosYoutubeDl = new FileOutputStream(TEMP_FOLDER + "youtube-dl" + videoNumber + ".exe");
             } catch (FileNotFoundException e) {
@@ -218,7 +218,7 @@ public class VideoDownloader implements Runnable {
             }
 
             if ( dlAudio ) {
-                isffmpeg = this.getClass().getClassLoader().getResourceAsStream("lib\\ffmpeg.exe");
+                isffmpeg = this.getClass().getClassLoader().getResourceAsStream("lib/ffmpeg.exe");
                 try {
                     fosffmpeg = new FileOutputStream(TEMP_FOLDER + "ffmpeg" + videoNumber + ".exe");
                 } catch (FileNotFoundException e) {
@@ -249,6 +249,8 @@ public class VideoDownloader implements Runnable {
             try {
                 while ((c = isYoutubeDl.read()) != -1)
                     fosYoutubeDl.write(c);
+                fosYoutubeDl.close();
+                isYoutubeDl.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -263,6 +265,8 @@ public class VideoDownloader implements Runnable {
                 try {
                     while ((c = isffmpeg.read()) != -1)
                         fosffmpeg.write(c);
+                    fosffmpeg.close();
+                    isffmpeg.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

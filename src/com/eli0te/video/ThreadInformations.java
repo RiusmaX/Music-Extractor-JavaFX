@@ -127,11 +127,11 @@ public class ThreadInformations implements Runnable {
         FileOutputStream fosYoutubeDl = null;
 
         File tempFolder = new File(TEMP_FOLDER);
+        String pathYoutubeDl = "lib/youtube-dl";
+        if ( isWindowsOS() ) pathYoutubeDl += ".exe";
         tempFolder.mkdirs();
-        if ( isWindowsOS() )
-            isYoutubeDl = this.getClass().getClassLoader().getResourceAsStream("lib\\youtube-dl.exe");
-        else
-            isYoutubeDl = this.getClass().getClassLoader().getResourceAsStream("lib/youtube-dl");
+
+        isYoutubeDl = this.getClass().getClassLoader().getResourceAsStream(pathYoutubeDl);
 
         try {
             fosYoutubeDl = new FileOutputStream(cmd);
@@ -140,9 +140,14 @@ public class ThreadInformations implements Runnable {
         }
 
         int c;
+
+
+
         try {
             while ((c = isYoutubeDl.read()) != -1)
                 fosYoutubeDl.write(c);
+            fosYoutubeDl.close();
+            isYoutubeDl.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
