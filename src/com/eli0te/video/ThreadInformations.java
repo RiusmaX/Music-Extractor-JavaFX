@@ -3,11 +3,7 @@ package com.eli0te.video;
 import com.eli0te.video.model.Video;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.file.Files;
+import java.io.*;
 import java.util.HashMap;
 
 /**
@@ -48,12 +44,11 @@ public class ThreadInformations implements Runnable {
 
         Process p;
 
-        try {
-            p = new ProcessBuilder(cmd, "-i", "-j", url).start();
-        } catch (IOException e){
+
+        if ( !isWindowsOS() )
             p = new ProcessBuilder("chmod", "a+x",cmd).start();
-            p = new ProcessBuilder(cmd,"-i", "-j", url).start();
-        }
+
+        p = new ProcessBuilder(cmd, "-i", "-j", url).start();
 
 
         InputStreamReader is = new InputStreamReader(p.getInputStream());
@@ -127,17 +122,27 @@ public class ThreadInformations implements Runnable {
 
     @Override
     public void run() {
-        File youtubeDlLib, youtubeDest;
 
-        if ( isWindowsOS() ) youtubeDlLib = new File("lib\\youtube-dl.exe");
-        else youtubeDlLib = new File("lib/youtube-dl");
-        youtubeDest = new File(cmd);
+        InputStream isYoutubeDl;
+        FileOutputStream fosYoutubeDl = null;
 
         File tempFolder = new File(TEMP_FOLDER);
         tempFolder.mkdirs();
+        if ( isWindowsOS() )
+            isYoutubeDl = this.getClass().getClassLoader().getResourceAsStream("lib\\youtube-dl.exe");
+        else
+            isYoutubeDl = this.getClass().getClassLoader().getResourceAsStream("lib/youtube-dl");
+
         try {
-            System.out.println("copie de youtube-dl-info");
-            Files.copy(youtubeDlLib.toPath(), youtubeDest.toPath());
+            fosYoutubeDl = new FileOutputStream(cmd);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        int c;
+        try {
+            while ((c = isYoutubeDl.read()) != -1)
+                fosYoutubeDl.write(c);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -147,6 +152,7 @@ public class ThreadInformations implements Runnable {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
 
     }
 }

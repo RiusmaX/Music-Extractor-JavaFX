@@ -2,6 +2,7 @@ package com.eli0te.video.view;
 
 import com.eli0te.video.MainApp;
 import com.eli0te.video.model.Video;
+import com.sun.javafx.tk.Toolkit;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -19,6 +20,9 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 
 
 /**
@@ -126,8 +130,17 @@ public class VideoOverviewController {
             }
         });
 
-        Image playImg = new Image("file:resources/img/play.png", 20, 20, false, false);
-        Image pauseImg = new Image("file:resources/img/pause.png", 20, 20, false, false);
+        InputStream is = this.getClass().getClassLoader().getResourceAsStream("resources/img/play.png");
+        InputStream is2 = this.getClass().getClassLoader().getResourceAsStream("resources/img/pause.png");
+        Image playImg = new Image(is, 20, 20, false, false);
+        Image pauseImg = new Image(is2, 20, 20, false, false);
+
+        try {
+            is.close();
+            is2.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         playButton.setGraphic(new ImageView(playImg));
         pauseButton.setGraphic(new ImageView(pauseImg));
@@ -170,7 +183,8 @@ public class VideoOverviewController {
             videoDescription.setText("Entrez le lien dans la barre en haut plus cliquez sur valider ! ");
             videoDuration.setText("");
             // Insérer le logo du logiciel ici !
-            videoThumbnail.setImage(new Image("file:resources/img/logo.png", 512, 512, false, false));
+            InputStream is = this.getClass().getClassLoader().getResourceAsStream("resources/img/logo.png");
+            videoThumbnail.setImage(new Image(is, 512, 512, false, false));
             videoThumbnail.setVisible(true);
             videoUploader.setText("World Of Code");
             videoEmbed.setVisible(false);

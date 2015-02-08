@@ -4,11 +4,7 @@ package com.eli0te.video;
 import com.eli0te.video.model.Video;
 import com.eli0te.video.view.VideoOverviewController;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.file.Files;
+import java.io.*;
 
 /**
  * Created by eLi0tE on 16/01/15.
@@ -64,6 +60,7 @@ public class VideoDownloader implements Runnable {
             cmd += TEMP_FOLDER + "youtube-dl";
             cmdYoutubeDl = TEMP_FOLDER + "youtube-dl" + String.valueOf(videoNumber);
             cmdFfmpeg = TEMP_FOLDER + "ffmpeg" + String.valueOf(videoNumber);
+            p = new ProcessBuilder("chmod", "a+x",cmdFfmpeg).start();
         }
 
         String finalFileDir = controller.getDownloadPath();
@@ -76,12 +73,25 @@ public class VideoDownloader implements Runnable {
 
         System.out.println("Debut du téléchargement de la vidéo : " + video.getVideoTitle());
 
-        p = new ProcessBuilder(cmdYoutubeDl,
-                "-i",
-                video.getVideoUrl(),
-                "-o",
-                videoFileDirTemp
-        ).start();
+
+        try {
+            p = new ProcessBuilder(cmdYoutubeDl,
+                    "-i",
+                    video.getVideoUrl(),
+                    "-o",
+                    videoFileDirTemp
+            ).start();
+        } catch (IOException e){
+            p = new ProcessBuilder("chmod", "a+x",cmdYoutubeDl).start();
+            p = new ProcessBuilder(cmdYoutubeDl,
+                    "-i",
+                    video.getVideoUrl(),
+                    "-o",
+                    videoFileDirTemp
+            ).start();
+        }
+
+
 
         BufferedReader in = new BufferedReader( new InputStreamReader(p.getInputStream()) );
 
@@ -181,34 +191,82 @@ public class VideoDownloader implements Runnable {
 
 
 
-        File youtubeDl, ffmpeg, destYoutubeDl, destFfmpeg;
+        InputStream isYoutubeDl, isffmpeg;
+        FileOutputStream fosYoutubeDl = null;
+        FileOutputStream fosffmpeg = null;
 
         // Uses of the right library depending on OS
         if ( isWindowsOS() ) {
             TEMP_FOLDER = System.getProperty("java.io.tmpdir")+"musicExtractorTemp\\";
-            youtubeDl = new File("lib\\youtube-dl.exe");
-            ffmpeg = new File("lib\\ffmpeg.exe");
-            destYoutubeDl = new File(TEMP_FOLDER + "youtube-dl" + videoNumber + ".exe");
-            destFfmpeg = new File(TEMP_FOLDER + "ffmpeg" + videoNumber + ".exe");
+
+            File tempFolder = new File(TEMP_FOLDER);
+            tempFolder.mkdirs();
+
+            isYoutubeDl = this.getClass().getClassLoader().getResourceAsStream("lib\\youtube-dl.exe");
+            try {
+                fosYoutubeDl = new FileOutputStream(TEMP_FOLDER + "youtube-dl" + videoNumber + ".exe");
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+
+            int c;
+            try {
+                while ((c = isYoutubeDl.read()) != -1)
+                    fosYoutubeDl.write(c);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            if ( dlAudio ) {
+                isffmpeg = this.getClass().getClassLoader().getResourceAsStream("lib\\ffmpeg.exe");
+                try {
+                    fosffmpeg = new FileOutputStream(TEMP_FOLDER + "ffmpeg" + videoNumber + ".exe");
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+                try {
+                    while ((c = isffmpeg.read()) != -1)
+                        fosffmpeg.write(c);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
         } else {
             TEMP_FOLDER = System.getProperty("java.io.tmpdir")+"musicExtractorTemp/";
-            youtubeDl = new File("lib/youtube-dl");
-            ffmpeg = new File("lib/ffmpeg");
-            destYoutubeDl = new File(TEMP_FOLDER + "youtube-dl" + videoNumber);
-            destFfmpeg = new File(TEMP_FOLDER + "ffmpeg" + videoNumber);
-        }
 
-        File tempFolder = new File(TEMP_FOLDER);
-        tempFolder.mkdirs();
-        try {
-            System.out.println("copie de youtubeDl" + videoNumber);
-            Files.copy(youtubeDl.toPath(), destYoutubeDl.toPath());
-            if ( dlAudio ) {
-                System.out.println("copie de ffmpeg" + videoNumber);
-                Files.copy(ffmpeg.toPath(), destFfmpeg.toPath());
+            File tempFolder = new File(TEMP_FOLDER);
+            tempFolder.mkdirs();
+
+            isYoutubeDl = this.getClass().getClassLoader().getResourceAsStream("lib/youtube-dl");
+            try {
+                fosYoutubeDl = new FileOutputStream(TEMP_FOLDER + "youtube-dl" + videoNumber);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+
+            int c;
+            try {
+                while ((c = isYoutubeDl.read()) != -1)
+                    fosYoutubeDl.write(c);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            if ( dlAudio ) {
+                isffmpeg = this.getClass().getClassLoader().getResourceAsStream("lib/ffmpeg");
+                try {
+                    fosffmpeg = new FileOutputStream(TEMP_FOLDER + "ffmpeg" + videoNumber);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+                try {
+                    while ((c = isffmpeg.read()) != -1)
+                        fosffmpeg.write(c);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
 
         try {
@@ -216,10 +274,5 @@ public class VideoDownloader implements Runnable {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        System.out.println("Suppression des fichiers (" + videoNumber + ")");
-        destYoutubeDl.delete();
-        destFfmpeg.delete();
-        tempFolder.delete();
     }
 }
