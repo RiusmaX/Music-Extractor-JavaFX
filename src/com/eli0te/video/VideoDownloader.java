@@ -21,8 +21,6 @@ public class VideoDownloader implements Runnable {
 
     private Process p;
 
-    public static String TEMP_FOLDER = "";
-
     private boolean dlAudio;
     private boolean dlVideo;
 
@@ -30,68 +28,39 @@ public class VideoDownloader implements Runnable {
     private VideoOverviewController controller;
 
     // Main App
-    MainApp main;
+    MainApp mainApp;
 
 
     String cmd;
     // VidéoNumber, numéro de la vidéo dans le liste de toutes les vidéos et videoId numéro de la vidéo dans la liste des vidéo à DL
-    public VideoDownloader(Video video, VideoOverviewController controller, MainApp main, boolean dlVideo, boolean dlAudio, int videoNumber, int videoId) {
+    public VideoDownloader(Video video, VideoOverviewController controller, MainApp mainApp, boolean dlVideo, boolean dlAudio, int videoNumber, int videoId) {
         this.dlAudio = dlAudio;
         this.dlVideo = dlVideo;
         this.videoNumber = videoNumber;
         this.video = video;
         this.controller = controller;
-        this.main = main;
+        this.mainApp = mainApp;
         this.videoId = videoId;
     }
 
     public void download() throws Exception {
-
-        String cmdYoutubeDl = "";
-        String cmdFfmpeg = "";
-
-        if (isWindowsOS()) {
-            TEMP_FOLDER = System.getProperty("java.io.tmpdir") + "musicExtractorTemp\\";
-            cmd += TEMP_FOLDER + "youtube-dl.exe";
-            cmdYoutubeDl = TEMP_FOLDER + "youtube-dl" + String.valueOf(videoNumber) + ".exe";
-            cmdFfmpeg = TEMP_FOLDER + "ffmpeg" + String.valueOf(videoNumber) + ".exe";
-        } else {
-            TEMP_FOLDER = System.getProperty("java.io.tmpdir") + "musicExtractorTemp/";
-            cmd += TEMP_FOLDER + "youtube-dl";
-            cmdYoutubeDl = TEMP_FOLDER + "youtube-dl" + String.valueOf(videoNumber);
-            cmdFfmpeg = TEMP_FOLDER + "ffmpeg" + String.valueOf(videoNumber);
-            p = new ProcessBuilder("chmod", "a+x",cmdFfmpeg).start();
-        }
 
         String finalFileDir = controller.getDownloadPath();
         if (isWindowsOS()) finalFileDir += "\\";
         else finalFileDir += "/";
         finalFileDir += video.getVideoTitle() + ".mp3";
 
-        String videoFileDirTemp = TEMP_FOLDER + "video_temp" + String.valueOf(videoNumber) + ".mp4";
-        String audioFileDirTemp = TEMP_FOLDER + "audio_temp" + String.valueOf(videoNumber) + ".mp3";
+        String videoFileDirTemp = mainApp.getTEMP_FOLDER() + "video_temp" + String.valueOf(videoNumber) + ".mp4";
+        String audioFileDirTemp = mainApp.getTEMP_FOLDER() + "audio_temp" + String.valueOf(videoNumber) + ".mp3";
 
         System.out.println("Debut du téléchargement de la vidéo : " + video.getVideoTitle());
 
-
-        try {
-            p = new ProcessBuilder(cmdYoutubeDl,
-                    "-i",
-                    video.getVideoUrl(),
-                    "-o",
-                    videoFileDirTemp
-            ).start();
-        } catch (IOException e){
-            p = new ProcessBuilder("chmod", "a+x",cmdYoutubeDl).start();
-            p = new ProcessBuilder(cmdYoutubeDl,
-                    "-i",
-                    video.getVideoUrl(),
-                    "-o",
-                    videoFileDirTemp
-            ).start();
-        }
-
-
+        p = new ProcessBuilder(mainApp.getYoutubeDlPathOut(),
+                "-i",
+                video.getVideoUrl(),
+                "-o",
+                videoFileDirTemp
+        ).start();
 
         BufferedReader in = new BufferedReader( new InputStreamReader(p.getInputStream()) );
 
@@ -103,7 +72,7 @@ public class VideoDownloader implements Runnable {
             if ( cmdOutput.contains("[download] ") && cmdOutput.contains("%")  ) {
                 s = cmdOutput.substring("[download] ".length(), cmdOutput.indexOf('%'));
                 if ( s.contains(".") ) // Exclude last doubling 100%
-                    controller.updateProgress(Double.parseDouble(s), videoId );
+                    controller.updateProgress( Double.parseDouble(s), videoId );
             }
         }
         in.close();
@@ -112,7 +81,7 @@ public class VideoDownloader implements Runnable {
 
         if (dlAudio) {
             System.out.println("Début de la conversion audio de la video : " + video.getVideoTitle());
-            p = new ProcessBuilder(cmdFfmpeg,
+            p = new ProcessBuilder(mainApp.getFfmpegPathOut(),
                     "-i",
                     videoFileDirTemp,
                     audioFileDirTemp
@@ -188,91 +157,6 @@ public class VideoDownloader implements Runnable {
 
     @Override
     public void run() {
-
-
-
-        InputStream isYoutubeDl, isffmpeg;
-        FileOutputStream fosYoutubeDl = null;
-        FileOutputStream fosffmpeg = null;
-
-        // Uses of the right library depending on OS
-        if ( isWindowsOS() ) {
-            TEMP_FOLDER = System.getProperty("java.io.tmpdir")+"musicExtractorTemp\\";
-
-            File tempFolder = new File(TEMP_FOLDER);
-            tempFolder.mkdirs();
-
-            isYoutubeDl = this.getClass().getClassLoader().getResourceAsStream("lib/youtube-dl.exe");
-            try {
-                fosYoutubeDl = new FileOutputStream(TEMP_FOLDER + "youtube-dl" + videoNumber + ".exe");
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-
-            int c;
-            try {
-                while ((c = isYoutubeDl.read()) != -1)
-                    fosYoutubeDl.write(c);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            if ( dlAudio ) {
-                isffmpeg = this.getClass().getClassLoader().getResourceAsStream("lib/ffmpeg.exe");
-                try {
-                    fosffmpeg = new FileOutputStream(TEMP_FOLDER + "ffmpeg" + videoNumber + ".exe");
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                }
-                try {
-                    while ((c = isffmpeg.read()) != -1)
-                        fosffmpeg.write(c);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
-        } else {
-            TEMP_FOLDER = System.getProperty("java.io.tmpdir")+"musicExtractorTemp/";
-
-            File tempFolder = new File(TEMP_FOLDER);
-            tempFolder.mkdirs();
-
-            isYoutubeDl = this.getClass().getClassLoader().getResourceAsStream("lib/youtube-dl");
-            try {
-                fosYoutubeDl = new FileOutputStream(TEMP_FOLDER + "youtube-dl" + videoNumber);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-
-            int c;
-            try {
-                while ((c = isYoutubeDl.read()) != -1)
-                    fosYoutubeDl.write(c);
-                fosYoutubeDl.close();
-                isYoutubeDl.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            if ( dlAudio ) {
-                isffmpeg = this.getClass().getClassLoader().getResourceAsStream("lib/ffmpeg");
-                try {
-                    fosffmpeg = new FileOutputStream(TEMP_FOLDER + "ffmpeg" + videoNumber);
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                }
-                try {
-                    while ((c = isffmpeg.read()) != -1)
-                        fosffmpeg.write(c);
-                    fosffmpeg.close();
-                    isffmpeg.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
         try {
             download();
         } catch (Exception e) {

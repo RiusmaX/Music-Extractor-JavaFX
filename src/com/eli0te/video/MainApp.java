@@ -14,8 +14,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -32,10 +31,27 @@ public class MainApp extends Application {
     private ObservableList<Video> videoData = FXCollections.observableArrayList();
     private VideoOverviewController controller;
     private int nbToDownload;
+    private String TEMP_FOLDER;
+
+    public String getTEMP_FOLDER() {
+        return TEMP_FOLDER;
+    }
+
+    private String youtubeDlPathOut, ffmpegPathOut;
+
+    private String youtubeDl, ffmpeg;
+
+    public String getYoutubeDlPathOut(){ return youtubeDlPathOut; }
+    public String getFfmpegPathOut(){ return ffmpegPathOut; }
+
+    private static final boolean isJar = true;
+
+    private static final String OS = System.getProperty("os.name").toLowerCase();
 
     private static final int downloaderPoolSize = 10;
 
     private static ExecutorService execSvcDl, execSvcInfo;
+
 
     /**
      *
@@ -51,6 +67,75 @@ public class MainApp extends Application {
 
             alert.showAndWait();
         });
+    }
+
+    private void initTempFile() throws IOException {
+
+        InputStream isYoutubeDl, isFfmpeg;
+        FileOutputStream fosYoutubeDl = null, fosFfmpeg = null;
+
+        TEMP_FOLDER = System.getProperty("java.io.tmpdir") + "musicExtractorTemp/";
+
+        if ( isJar ) {
+            youtubeDlPathOut = TEMP_FOLDER +"youtube-dl";
+            ffmpegPathOut = TEMP_FOLDER +"ffmpeg";
+            youtubeDl = "lib/youtube-dl";
+            ffmpeg = "lib/ffmpeg";
+
+            if ( isWindowsOS() ) {
+                youtubeDlPathOut += ".exe";
+                ffmpegPathOut += ".exe";
+                youtubeDl += ".exe";
+                ffmpeg += ".exe";
+            }
+        }
+
+        File ffmpegFile, youtubedlFile;
+        try {
+            ffmpegFile = new File(ffmpegPathOut);
+            youtubedlFile = new File(youtubeDlPathOut);
+            if (ffmpegFile.exists() && youtubedlFile.exists())
+                return;
+        } catch (Exception e) {
+        }
+
+        // Temp foler creation
+        File tempFolder = new File(TEMP_FOLDER);
+        tempFolder.mkdirs();
+
+        isYoutubeDl = this.getClass().getClassLoader().getResourceAsStream(youtubeDl);
+        isFfmpeg = this.getClass().getClassLoader().getResourceAsStream(ffmpeg);
+
+        try {
+            fosYoutubeDl = new FileOutputStream(youtubeDlPathOut);
+            fosFfmpeg = new FileOutputStream(ffmpegPathOut);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        int c;
+
+        // Copy Files in threads ? Or avert people
+
+        while ((c = isYoutubeDl.read()) != -1)
+            fosYoutubeDl.write(c);
+        while ((c = isFfmpeg.read()) != -1)
+            fosFfmpeg.write(c);
+        fosYoutubeDl.close();
+        isYoutubeDl.close();
+
+
+        if ( !isWindowsOS() ) {
+            new ProcessBuilder("chmod", "+x", youtubeDlPathOut).start();
+            new ProcessBuilder("chmod", "+x", ffmpegPathOut).start();
+        }
+
+    }
+
+    private static boolean isWindowsOS(){
+        if (OS.contains("win"))
+            return true;
+        return false;
     }
 
     public void setVideoList(String url){
@@ -138,6 +223,12 @@ public class MainApp extends Application {
         initRootLayout();
 
         showVideoOverview();
+
+        try {
+            initTempFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -193,7 +284,7 @@ public class MainApp extends Application {
             // Set video overview into the center of root layout.
             rootLayout.setCenter(videoOverview);
 
-            // Give the controller access to the main app.
+            // Give the controller access to the mainApp app.
             controller = loader.getController();
             controller.setMainApp(this);
 
@@ -237,15 +328,18 @@ public class MainApp extends Application {
                     deleteFile(fileDelete);
                 }
 
-                if ( file.list().length == 0 ){
+                if ( file.list().length > 0 ){
                     file.delete();
                     System.out.println("Suppression du dossier : " + file.getAbsolutePath());
                 }
             }
         }else{
             //if file, then delete it
-            file.delete();
-            System.out.println("Suppression du fichier : " + file.getAbsolutePath());
+            if ( file.getName().contains("ffmpeg") || file.getName().contains("youtube-dl") ){}
+            else {
+                file.delete();
+                System.out.println("Suppression du fichier : " + file.getAbsolutePath());
+            }
         }
     }
 }

@@ -14,10 +14,9 @@ public class ThreadInformations implements Runnable {
 
     private static String OS = System.getProperty("os.name").toLowerCase();
 
-    public String TEMP_FOLDER = System.getProperty("java.io.tmpdir");
+
 
     private MainApp mainApp;
-    private String cmd = "";
 
     //url
     private String url;
@@ -29,26 +28,13 @@ public class ThreadInformations implements Runnable {
     public ThreadInformations(String url, MainApp mainApp) {
         this.mainApp = mainApp;
         setUrl(url);
-
-        if ( isWindowsOS() ) {
-            TEMP_FOLDER += "musicExtractorTemp\\";
-            cmd += TEMP_FOLDER +"youtube-dl-info.exe";
-        } else {
-            TEMP_FOLDER += "musicExtractorTemp/";
-            cmd += TEMP_FOLDER +"youtube-dl-info";
-        }
-
     }
 
     public void getInformation(String url) throws Exception {
 
         Process p;
 
-
-        if ( !isWindowsOS() )
-            p = new ProcessBuilder("chmod", "a+x",cmd).start();
-
-        p = new ProcessBuilder(cmd, "-i", "-j", url).start();
+        p = new ProcessBuilder(mainApp.getYoutubeDlPathOut(), "-i", "-j", url).start();
 
 
         InputStreamReader is = new InputStreamReader(p.getInputStream());
@@ -114,44 +100,8 @@ public class ThreadInformations implements Runnable {
         }
     }
 
-    private static boolean isWindowsOS(){
-        if ( OS.indexOf("win") >= 0 )
-            return true;
-        return false;
-    }
-
     @Override
     public void run() {
-
-        InputStream isYoutubeDl;
-        FileOutputStream fosYoutubeDl = null;
-
-        File tempFolder = new File(TEMP_FOLDER);
-        String pathYoutubeDl = "lib/youtube-dl";
-        if ( isWindowsOS() ) pathYoutubeDl += ".exe";
-        tempFolder.mkdirs();
-
-        isYoutubeDl = this.getClass().getClassLoader().getResourceAsStream(pathYoutubeDl);
-
-        try {
-            fosYoutubeDl = new FileOutputStream(cmd);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        int c;
-
-
-
-        try {
-            while ((c = isYoutubeDl.read()) != -1)
-                fosYoutubeDl.write(c);
-            fosYoutubeDl.close();
-            isYoutubeDl.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
         try {
             getInformation(url);
         } catch (Exception e) {
