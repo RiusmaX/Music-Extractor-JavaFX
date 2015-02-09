@@ -78,11 +78,14 @@ public class VideoOverviewController {
     private String videoUrl;
     private MainApp mainApp;
 
+    private static final boolean isJar = false;
+
     /**
      * The constructor.
      * The constructor is called before the initialize() method.
      */
     public VideoOverviewController() {
+
     }
 
     /**
@@ -148,16 +151,23 @@ public class VideoOverviewController {
             }
         });
 
-        InputStream is = this.getClass().getClassLoader().getResourceAsStream("resources/img/play.png");
-        InputStream is2 = this.getClass().getClassLoader().getResourceAsStream("resources/img/pause.png");
-        Image playImg = new Image(is, 20, 20, false, false);
-        Image pauseImg = new Image(is2, 20, 20, false, false);
+        Image playImg, pauseImg;
 
-        try {
-            is.close();
-            is2.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+        if ( isJar ) {
+            InputStream is = this.getClass().getClassLoader().getResourceAsStream("resources/img/play.png");
+            InputStream is2 = this.getClass().getClassLoader().getResourceAsStream("resources/img/pause.png");
+            playImg = new Image(is, 20, 20, false, false);
+            pauseImg = new Image(is2, 20, 20, false, false);
+
+            try {
+                is.close();
+                is2.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            playImg = new Image("file:resources/img/play.png", 20, 20, false, false);
+            pauseImg = new Image("file:resources/img/pause.png", 20, 20, false, false);
         }
 
         playButton.setGraphic(new ImageView(playImg));
@@ -200,9 +210,11 @@ public class VideoOverviewController {
             videoTitle.setText("Bienvenue sur Music Extractor");
             videoDescription.setText("Entrez le lien dans la barre en haut plus cliquez sur valider ! ");
             videoDuration.setText("");
-            // Insérer le logo du logiciel ici !
-            InputStream is = this.getClass().getClassLoader().getResourceAsStream("resources/img/logo.png");
-            videoThumbnail.setImage(new Image(is, 512, 512, false, false));
+            if ( isJar ) {
+                InputStream is = this.getClass().getClassLoader().getResourceAsStream("resources/img/logo.png");
+                videoThumbnail.setImage(new Image(is, 512, 512, false, false));
+            } else
+                videoThumbnail.setImage(new Image("file:resources/img/logo.png", 512, 512, false, false));
             videoThumbnail.setVisible(true);
             videoUploader.setText("World Of Code");
             videoEmbed.setVisible(false);

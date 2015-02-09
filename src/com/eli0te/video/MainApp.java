@@ -15,6 +15,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -44,7 +45,7 @@ public class MainApp extends Application {
     public String getYoutubeDlPathOut(){ return youtubeDlPathOut; }
     public String getFfmpegPathOut(){ return ffmpegPathOut; }
 
-    private static final boolean isJar = true;
+    private static final boolean isJar = false;
 
     private static final String OS = System.getProperty("os.name").toLowerCase();
 
@@ -71,26 +72,21 @@ public class MainApp extends Application {
 
     private void initTempFile() throws IOException {
 
-        InputStream isYoutubeDl, isFfmpeg;
-        FileOutputStream fosYoutubeDl = null, fosFfmpeg = null;
-
         TEMP_FOLDER = System.getProperty("java.io.tmpdir") + "musicExtractorTemp/";
 
-        if ( isJar ) {
-            youtubeDlPathOut = TEMP_FOLDER +"youtube-dl";
-            ffmpegPathOut = TEMP_FOLDER +"ffmpeg";
-            youtubeDl = "lib/youtube-dl";
-            ffmpeg = "lib/ffmpeg";
+        youtubeDlPathOut = TEMP_FOLDER +"youtube-dl";
+        ffmpegPathOut = TEMP_FOLDER +"ffmpeg";
+        youtubeDl = "lib/youtube-dl";
+        ffmpeg = "lib/ffmpeg";
 
-            if ( isWindowsOS() ) {
-                youtubeDlPathOut += ".exe";
-                ffmpegPathOut += ".exe";
-                youtubeDl += ".exe";
-                ffmpeg += ".exe";
-            }
+        if ( isWindowsOS() ) {
+            youtubeDlPathOut += ".exe";
+            ffmpegPathOut += ".exe";
+            youtubeDl += ".exe";
+            ffmpeg += ".exe";
         }
 
-        File ffmpegFile, youtubedlFile;
+        File ffmpegFile = null, youtubedlFile = null;
         try {
             ffmpegFile = new File(ffmpegPathOut);
             youtubedlFile = new File(youtubeDlPathOut);
@@ -103,27 +99,48 @@ public class MainApp extends Application {
         File tempFolder = new File(TEMP_FOLDER);
         tempFolder.mkdirs();
 
-        isYoutubeDl = this.getClass().getClassLoader().getResourceAsStream(youtubeDl);
-        isFfmpeg = this.getClass().getClassLoader().getResourceAsStream(ffmpeg);
+        if ( isJar ) {
 
-        try {
-            fosYoutubeDl = new FileOutputStream(youtubeDlPathOut);
-            fosFfmpeg = new FileOutputStream(ffmpegPathOut);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+
+            if (!ffmpegFile.exists()) {
+                InputStream isFfmpeg = this.getClass().getClassLoader().getResourceAsStream(ffmpeg);
+                FileOutputStream fosFfmpeg = null;
+                try {
+                    fosFfmpeg = new FileOutputStream(ffmpegPathOut);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+
+                int c;
+                // Copy Files in threads ? Or avert people
+                while ((c = isFfmpeg.read()) != -1)
+                    fosFfmpeg.write(c);
+                fosFfmpeg.close();
+                isFfmpeg.close();
+
+            }
+            if (!youtubedlFile.exists()) {
+                InputStream isYoutubeDl = this.getClass().getClassLoader().getResourceAsStream(youtubeDl);
+                FileOutputStream fosYoutubeDl = null;
+                try {
+                    fosYoutubeDl = new FileOutputStream(youtubeDlPathOut);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+
+                int c;
+                // Copy Files in threads ? Or avert people
+                while ((c = isYoutubeDl.read()) != -1)
+                    fosYoutubeDl.write(c);
+                fosYoutubeDl.close();
+                isYoutubeDl.close();
+            }
+        } else {
+            if ( !ffmpegFile.exists() )
+                Files.copy(new File(youtubeDl).toPath(), new File(youtubeDlPathOut).toPath());
+            if ( !youtubedlFile.exists() )
+                Files.copy(new File(ffmpeg).toPath(), new File(ffmpegPathOut).toPath());
         }
-
-        int c;
-
-        // Copy Files in threads ? Or avert people
-
-        while ((c = isYoutubeDl.read()) != -1)
-            fosYoutubeDl.write(c);
-        while ((c = isFfmpeg.read()) != -1)
-            fosFfmpeg.write(c);
-        fosYoutubeDl.close();
-        isYoutubeDl.close();
-
 
         if ( !isWindowsOS() ) {
             new ProcessBuilder("chmod", "+x", youtubeDlPathOut).start();
