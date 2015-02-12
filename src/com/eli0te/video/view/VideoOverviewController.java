@@ -219,7 +219,7 @@ public class VideoOverviewController {
 
     public boolean selectAllChecked() {
         return selectAll.isSelected();
-    }
+    } 
 
     public synchronized void updateProgress(Double value, int videoId) {
         tabProgressManager[videoId] = value;
