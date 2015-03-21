@@ -83,6 +83,8 @@ public class Helper {
             i++;
         }
         System.out.println(i);
+        is.close();
+        in.close();
         return infoMapList;
     }
 

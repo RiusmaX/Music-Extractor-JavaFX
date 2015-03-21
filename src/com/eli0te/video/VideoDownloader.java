@@ -157,15 +157,15 @@ public class VideoDownloader implements Runnable {
      * Redirige la sortie de console du processus passé en parametre dans la sortie du logiciel
      * @param p : le processus dont la sortie doit être redirigée
      */
-    private void printProcessOutput(Process p) {
+    private void printProcessOutput(Process p) throws IOException {
         BufferedReader in = new BufferedReader( new InputStreamReader(p.getInputStream()));
         String cmdOutput;
         try {
             while ((cmdOutput = in.readLine()) != null) {
                 System.out.println(cmdOutput);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        } finally {
+            in.close();
         }
     }
 

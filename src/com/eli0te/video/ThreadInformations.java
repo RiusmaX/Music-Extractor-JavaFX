@@ -90,6 +90,8 @@ public class ThreadInformations implements Runnable {
             System.out.println(videoNumber + " : Ajout de la vidéo : " + infoMap.get("title") + " à la liste");
             videoNumber++;
         }
+        in.close();
+        is.close();
         return;
     }
 
@@ -116,6 +118,12 @@ public class ThreadInformations implements Runnable {
             while ( (cmdOutput = in.readLine()) != null ) { System.out.println(cmdOutput); }
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            try {
+                in.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
