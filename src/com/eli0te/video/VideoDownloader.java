@@ -91,16 +91,16 @@ public class VideoDownloader implements Runnable {
         // Parsing download progress :
         while ( (cmdOutput = in.readLine()) != null ) {
             if ( cmdOutput.contains("[download] ") && cmdOutput.contains("%")  ) {
-                s = cmdOutput.substring("[download] ".length(), cmdOutput.indexOf('%'));
-                if ( s.contains(".") ) // Exclude last doubling 100%
-                    controller.updateProgress(Double.parseDouble(s), videoId );
-            }
+            s = cmdOutput.substring("[download] ".length(), cmdOutput.indexOf('%'));
+            if ( s.contains(".") ) // Exclude last doubling 100%
+                controller.updateProgress(Double.parseDouble(s), videoId );
         }
-        in.close();
+    }
+    in.close();
 
-        System.out.println("Fin du téléchargement de la vidéo  : " + video.getVideoTitle());
+    System.out.println("Fin du téléchargement de la vidéo  : " + video.getVideoTitle());
 
-        if (dlAudio) {
+    if (dlAudio) {
             System.out.println("Début de la conversion audio de la video : " + video.getVideoTitle());
             p = new ProcessBuilder(cmdFfmpeg,
                     "-i",
